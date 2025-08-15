@@ -6,8 +6,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 
-// --- Config your backend origin here ---
-const API_ORIGIN = "http://localhost:5174";
+// --- Config your backend origin here (override with VITE_API_ORIGIN in prod) ---
+const API_ORIGIN: string = import.meta.env.VITE_API_ORIGIN || (typeof window !== 'undefined' ? window.location.origin : '');
 
 interface Message {
 	role: "user" | "assistant";
@@ -146,7 +146,7 @@ export default function App() {
 
 	async function streamRequest(text: string) {
 		setLoading(true);
-		const url = new URL(`${API_ORIGIN}/api/stream`);
+		const url = new URL('/api/stream', API_ORIGIN || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173'));
 		url.searchParams.set("message", text);
 		url.searchParams.set("session_id", sessionId);
 
