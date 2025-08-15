@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Smooth color transitions for theme changes */
+html, body, #root {
+  height: 100%;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+* {
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+/* Markdown content styles */
+.prose pre code {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.prose pre {
+  background-color: rgba(115,115,115,0.12);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+.prose code {
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.35rem;
+  background-color: rgba(115,115,115,0.12);
+}
+.dark .prose code {
+  background-color: rgba(255,255,255,0.08);
+}
+
+/* Indeterminate top progress bar */
+@keyframes progress-slide {
+  0% {
+    transform: translateX(-60%);
+  }
+  100% {
+    transform: translateX(160%);
+  }
+}
+
+.animate-progress-slide {
+  animation: progress-slide 1.2s linear infinite;
+}

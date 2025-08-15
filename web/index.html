@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (() => {
+        try {
+          const override = localStorage.getItem('theme_override');
+          const supportsMql = typeof window !== 'undefined' && !!window.matchMedia;
+          const prefersDark = supportsMql && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const prefersLight = supportsMql && window.matchMedia('(prefers-color-scheme: light)').matches;
+          const resolved = (override === 'dark' || override === 'light')
+            ? override
+            : (prefersDark ? 'dark' : (prefersLight ? 'light' : 'dark'));
+          if (resolved === 'dark') document.documentElement.classList.add('dark');
+          else document.documentElement.classList.remove('dark');
+
+          // Keep in sync with OS when no manual override is set
+          if (!override && supportsMql) {
+            const mql = window.matchMedia('(prefers-color-scheme: dark)');
+            const apply = (isDark) => {
+              if (localStorage.getItem('theme_override')) return; // stop if user sets override later
+              document.documentElement.classList.toggle('dark', !!isDark);
+            };
+            const onChange = (e) => apply(e.matches);
+            if (typeof mql.addEventListener === 'function') {
+              mql.addEventListener('change', onChange);
+            } else if (typeof mql.addListener === 'function') {
+              mql.addListener(onChange);
+            }
+          }
+        } catch {}
+      })();
+    </script>
+    <title>Yurie</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
