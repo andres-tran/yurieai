@@ -4,6 +4,7 @@
   "installCommand": "cd web && npm ci",
   "framework": null,
   "rewrites": [
+    { "source": "/api/stream", "destination": "/api/stream" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/health", "destination": "/health" }
   ],

@@ -145,7 +145,10 @@ export default function App() {
 
 	async function streamRequest(text: string) {
 		setLoading(true);
-		const url = new URL('/api/stream', API_ORIGIN || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173'));
+		const streamPath = (API_ORIGIN ? new URL('/api/stream', API_ORIGIN) : new URL('/api/stream', window.location.origin));
+		const edgePath = (API_ORIGIN ? new URL('/api/stream', API_ORIGIN) : new URL('/api/stream', window.location.origin));
+		// In Vercel production, prefer the Edge Function at /api/stream (same path)
+		const url = streamPath;
 		url.searchParams.set("message", text);
 		url.searchParams.set("session_id", sessionId);
 
