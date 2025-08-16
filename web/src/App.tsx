@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Loader2, Send, Globe2, Zap, Sun, Moon, Menu, Plus, Trash2, MessageSquare, Copy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeHighlight from "rehype-highlight";
+const Markdown = lazy(() => import("./components/Markdown"));
 
 // --- Config your backend origin here (override with VITE_API_ORIGIN in prod) ---
 const API_ORIGIN: string = import.meta.env.VITE_API_ORIGIN || (typeof window !== 'undefined' ? window.location.origin : '');
@@ -25,6 +23,7 @@ export default function App() {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [input, setInput] = useState("");
 	const [loading, setLoading] = useState(false);
+	const esRef = useRef<EventSource | null>(null);
 	const [theme, setTheme] = useState<"light" | "dark">(() => (typeof document !== "undefined" && document.documentElement.classList.contains("dark")) ? "dark" : "light");
 	const [themeOverride, setThemeOverride] = useState<"light" | "dark" | null>(null);
 	const [systemDark, setSystemDark] = useState<boolean>(() => (typeof window !== "undefined" && window.matchMedia) ? window.matchMedia("(prefers-color-scheme: dark)").matches : false);
@@ -151,14 +150,17 @@ export default function App() {
 		url.searchParams.set("session_id", sessionId);
 
 		const es = new EventSource(url.toString());
+		esRef.current = es;
 		// Only handle explicit "token" events to avoid duplicate appends from default messages
 		es.addEventListener("token", (ev) => appendToken((ev as MessageEvent).data));
 		es.addEventListener("done", () => {
 			es.close();
+			esRef.current = null;
 			setLoading(false);
 		});
 		es.onerror = () => {
 			es.close();
+			esRef.current = null;
 			setLoading(false);
 		};
 	}
@@ -204,6 +206,14 @@ export default function App() {
 		setSidebarOpen(false);
 	}
 
+	function stopStreaming() {
+		if (esRef.current) {
+			esRef.current.close();
+			esRef.current = null;
+			setLoading(false);
+		}
+	}
+
 	function openConversation(id: string) {
 		setCurrentId(id);
 		const found = conversations.find(c => c.id === id);
@@ -221,40 +231,23 @@ export default function App() {
 
 	function TypingIndicator() {
 		return (
-			<div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400">
+			<div className="inline-flex items-center rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white/70 dark:bg-zinc-800/50 px-2.5 py-1.5 text-zinc-500 dark:text-zinc-400">
 				<span className="sr-only">Assistant is typing</span>
-				{[0, 1, 2].map((i) => (
-					<motion.span
-						key={i}
-						initial={{ y: 0, opacity: 0.4 }}
-						animate={{ y: -3, opacity: 1 }}
-						transition={{ duration: 0.6, repeat: Infinity, repeatType: "mirror", delay: i * 0.15 }}
-						className="h-1.5 w-1.5 rounded-full bg-current"
-					/>
-				))}
+				<div className="typing-dots flex items-center">
+					<span className="dot" />
+					<span className="dot" />
+					<span className="dot" />
+					<span className="caret" />
+				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 selection:bg-zinc-900/10 dark:selection:bg-white/10 pb-24">
-			<AnimatePresence initial={false}>
-				{loading && (
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						className="fixed top-0 left-0 right-0 z-20 h-0.5 bg-transparent"
-					>
-						<div className="relative h-full">
-							<div className="absolute inset-y-0 left-0 w-1/3 h-full rounded-r-full bg-zinc-900 dark:bg-zinc-100 animate-progress-slide" />
-						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
+		<div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 selection:bg-zinc-900/10 dark:selection:bg-white/10 pb-24 safe-bottom">
 			{/* Header */}
 			<header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/60 bg-white/80 dark:bg-zinc-900/60 border-b border-zinc-200 dark:border-zinc-800">
-				<div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-3">
+				<div className="mx-auto max-w-6xl px-4 py-3 safe-top flex items-center gap-3">
 					<button onClick={() => setSidebarOpen(v => !v)} className="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-xl border border-zinc-300 dark:border-zinc-700">
 						<Menu className="h-4 w-4" />
 					</button>
@@ -264,6 +257,16 @@ export default function App() {
 					<div className="flex-1">
 						<div className="text-sm font-semibold">Yurie</div>
 					</div>
+					{loading && (
+						<button
+							onClick={stopStreaming}
+							type="button"
+							className="inline-flex items-center gap-1 rounded-xl border border-zinc-300 dark:border-zinc-700 px-2 py-1 text-xs hover:bg-zinc-100 dark:hover:bg-zinc-800"
+							title="Stop generating"
+						>
+							<Loader2 className="h-3.5 w-3.5 animate-spin" /> Stop
+						</button>
+					)}
 					<button
 						type="button"
 						onClick={() => setThemeOverride(prev => {
@@ -363,7 +366,9 @@ export default function App() {
 											{m.role === 'assistant' ? (
 												<div className="prose prose-zinc dark:prose-invert max-w-none">
 													{m.content ? (
-														<ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>{m.content}</ReactMarkdown>
+														<Suspense fallback={<TypingIndicator />}>
+															<Markdown content={m.content} />
+														</Suspense>
 													) : loading ? (
 														<TypingIndicator />
 													) : null}
@@ -386,7 +391,7 @@ export default function App() {
 			</div>
 
 			{/* Composer */}
-			<div className="fixed inset-x-0 bottom-0 z-10 border-t border-zinc-200 bg-white/90 dark:bg-zinc-900/70 dark:border-zinc-800 backdrop-blur supports-[backdrop-filter]:bg-white/70">
+			<div className="fixed inset-x-0 bottom-0 z-10 border-t border-zinc-200 bg-white/90 dark:bg-zinc-900/70 dark:border-zinc-800 backdrop-blur supports-[backdrop-filter]:bg-white/70 safe-bottom">
 				<form onSubmit={(e) => { e.preventDefault(); send(); }} className="mx-auto max-w-6xl px-4 py-3 flex gap-2 items-center">
 					<div className="flex-1 relative">
 						<input
@@ -399,7 +404,7 @@ export default function App() {
 								}
 							}}
 							placeholder="Ask me to research something…"
-							className="w-full rounded-2xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 pr-20 outline-none focus:ring-4 ring-zinc-900/10 dark:ring-white/10 placeholder:text-zinc-500 dark:placeholder:text-zinc-400"
+							className="w-full rounded-2xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 pr-20 outline-none focus:ring-4 ring-zinc-900/10 dark:ring-white/10 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 text-base"
 						/>
 						<div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 flex items-center gap-3">
 							{loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
@@ -412,9 +417,6 @@ export default function App() {
 						className="inline-flex items-center gap-2 rounded-2xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-3 disabled:opacity-40"
 					>
 						<Send className="h-4 w-4" /> Send
-					</button>
-					<button onClick={startNewChat} type="button" className="ml-1 inline-flex items-center gap-1 rounded-2xl border border-zinc-300 dark:border-zinc-700 px-3 py-3 text-sm">
-						<Plus className="h-4 w-4" /> New chat
 					</button>
 				</form>
 			</div>

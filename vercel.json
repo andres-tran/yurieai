@@ -4,7 +4,8 @@
   "installCommand": "cd web && npm ci",
   "framework": null,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" }
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/health", "destination": "/health" }
   ],
   "cleanUrls": true,
   "trailingSlash": false

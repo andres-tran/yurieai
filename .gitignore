@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# SQLite sessions
+server/sessions.db
+server/sessions.db-shm
+server/sessions.db-wal
+
+# Node / Vite
+web/node_modules/
+web/dist/
+web/.vite/
+web/.eslintcache
+
+# Logs
+*.log
