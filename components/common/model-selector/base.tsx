@@ -16,7 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import {
   Tooltip,
@@ -29,12 +28,8 @@ import { ModelConfig } from "@/lib/models/types"
 import { PROVIDERS } from "@/lib/providers"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
-import {
-  CaretDownIcon,
-  MagnifyingGlassIcon,
-  StarIcon,
-} from "@phosphor-icons/react"
-import { useRef, useState } from "react"
+import { CaretDownIcon, StarIcon } from "@phosphor-icons/react"
+import { useState } from "react"
 import { ProModelDialog } from "./pro-dialog"
  
 
@@ -65,9 +60,6 @@ export function ModelSelector({
   const [isProDialogOpen, setIsProDialogOpen] = useState(false)
   const [selectedProModel, setSelectedProModel] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-
-  // Ref for input to maintain focus
-  const searchInputRef = useRef<HTMLInputElement>(null)
 
   useKeyShortcut(
     (e) => (e.key === "p" || e.key === "P") && e.metaKey && e.shiftKey,
@@ -143,11 +135,7 @@ export function ModelSelector({
     </Button>
   )
 
-  // Handle input change without losing focus
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation()
-    setSearchQuery(e.target.value)
-  }
+  // No search input on mobile; desktop search is not used in this component
 
   // Auth removed: always allow model selection
 
@@ -165,19 +153,6 @@ export function ModelSelector({
             <DrawerHeader>
               <DrawerTitle>Select Model</DrawerTitle>
             </DrawerHeader>
-            <div className="px-4 pb-2">
-              <div className="relative">
-                <MagnifyingGlassIcon className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-                <Input
-                  ref={searchInputRef}
-                  placeholder="Search models..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-            </div>
             <div className="flex h-full flex-col space-y-0 overflow-y-auto px-4 pb-6">
               {isLoadingModels ? (
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">

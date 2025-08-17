@@ -315,19 +315,6 @@ export function MultiModelSelector({
                 Select Models ({selectedModelIds.length}/{maxModels})
               </DrawerTitle>
             </DrawerHeader>
-            <div className="px-4 pb-2">
-              <div className="relative">
-                <MagnifyingGlassIcon className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-                <Input
-                  ref={searchInputRef}
-                  placeholder="Search models..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-            </div>
             <div className="flex h-full flex-col space-y-0 overflow-y-auto px-4 pb-6">
               {isLoadingModels ? (
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
