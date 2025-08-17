@@ -1,8 +1,8 @@
-# Zola Installation Guide (No Auth)
+# Yurie Installation Guide
 
-Zola is a free, open-source AI chat app using OpenAI models only. This guide covers how to install and run Zola on different platforms, including Docker deployment options.
+Yurie is a free, open-source AI chat app using OpenAI models. This guide covers how to install and run Yurie on different platforms, including Docker deployment options.
 
-![Zola screenshot](./public/cover_zola.webp)
+![Yurie screenshot](./public/cover_yurie.jpg)
 
 ## Prerequisites
 
@@ -74,8 +74,8 @@ No database is required in this fork.
 
 ```bash
 # Clone the repository
-git clone https://github.com/ibelick/zola.git
-cd zola
+git clone https://github.com/andres-tran/yurieai.git
+cd yurieai
 
 # Install dependencies
 npm install
@@ -88,8 +88,8 @@ npm run dev
 
 ```bash
 # Clone the repository
-git clone https://github.com/ibelick/zola.git
-cd zola
+git clone https://github.com/andres-tran/yurieai.git
+cd yurieai
 
 # Install dependencies
 npm install
@@ -99,8 +99,6 @@ npm run dev
 ```
 
 The application will be available at [http://localhost:3000](http://localhost:3000).
-
-<!-- DB removed in this build -->
 
 ## Docker Installation
 
@@ -179,12 +177,12 @@ Build and run the Docker container:
 
 ```bash
 # Build the Docker image
-docker build -t zola .
+docker build -t yurie .
 
 # Run the container
 docker run -p 3000:3000 \
   -e OPENAI_API_KEY=your_openai_api_key \
-  zola
+  yurie
 ```
 
 ### Option 2: Docker Compose
@@ -195,7 +193,7 @@ Create a `docker-compose.yml` file in the root of your project:
 version: "3"
 
 services:
-  zola:
+  yurie:
     build:
       context: .
       dockerfile: Dockerfile
@@ -220,13 +218,11 @@ docker-compose logs -f
 docker-compose down
 ```
 
-<!-- Ollama and other providers removed in this build -->
-
 ## Production Deployment
 
 ### Deploy to Vercel
 
-The easiest way to deploy Zola is using Vercel:
+The easiest way to deploy Yurie is using Vercel:
 
 1. Push your code to a Git repository (GitHub, GitLab, etc.)
 2. Import the project into Vercel
@@ -255,7 +251,7 @@ npm start
 
 ## Configuration Options
 
-You can customize various aspects of Zola by modifying the configuration files:
+You can customize various aspects of Yurie by modifying the configuration files:
 
 - `app/lib/config.ts`: Configure AI models, daily message limits, etc.
 - `.env.local`: Set environment variables and API keys

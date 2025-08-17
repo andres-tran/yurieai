@@ -28,12 +28,11 @@ export function SidebarItemMenu({
   const router = useRouter()
   const { deleteMessages } = useMessages()
   const { deleteChat } = useChats()
-  const chatId = null
   const isMobile = useBreakpoint(768)
 
   const handleConfirmDelete = async () => {
     await deleteMessages()
-    await deleteChat(chat.id, chatId!, () => router.push("/"))
+    await deleteChat(chat.id, undefined, () => router.push("/"))
   }
 
   return (

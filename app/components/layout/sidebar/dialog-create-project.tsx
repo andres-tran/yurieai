@@ -50,9 +50,9 @@ export function DialogCreateProject({
 
       return response.json()
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] })
-      router.push(`/p/${data.id}`)
+      router.push(`/`)
       setProjectName("")
       setIsOpen(false)
     },

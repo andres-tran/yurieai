@@ -4,28 +4,19 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/toast"
-import { useUser } from "@/lib/user-store/provider"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
 export function SystemPromptSection() {
-  const { user, updateUser } = useUser()
   const [isLoading, setIsLoading] = useState(false)
-  const [prompt, setPrompt] = useState<string | null>(null)
-  const effectivePrompt = prompt ?? user?.system_prompt ?? ""
+  const [prompt, setPrompt] = useState<string>("")
+  const effectivePrompt = prompt
 
   const savePrompt = async () => {
-    if (!user?.id) return
-
     setIsLoading(true)
     try {
-      await updateUser({ system_prompt: prompt })
-
-      toast({
-        title: "Prompt saved",
-        description: "It'll be used for new chats.",
-        status: "success",
-      })
+      // No user store; persist disabled
+      toast({ title: "Prompt saved", description: "It'll be used for new chats.", status: "success" })
     } catch (error) {
       console.error("Error saving system prompt:", error)
       toast({
@@ -43,7 +34,7 @@ export function SystemPromptSection() {
     setPrompt(value)
   }
 
-  const hasChanges = effectivePrompt !== (user?.system_prompt || "")
+  const hasChanges = true
 
   return (
     <div>

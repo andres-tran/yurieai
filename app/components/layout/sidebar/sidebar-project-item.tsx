@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { Check, FolderIcon, X } from "@phosphor-icons/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+// removed pathname usage
 import { useCallback, useMemo, useRef, useState } from "react"
 import { SidebarProjectMenu } from "./sidebar-project-menu"
 
@@ -30,7 +30,6 @@ export function SidebarProjectItem({ project }: SidebarProjectItemProps) {
   const lastProjectNameRef = useRef(project.name)
   const isMobile = useBreakpoint(768)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const pathname = usePathname()
   const queryClient = useQueryClient()
 
   if (!isEditing && lastProjectNameRef.current !== project.name) {
@@ -201,8 +200,8 @@ export function SidebarProjectItem({ project }: SidebarProjectItemProps) {
 
   // Memoize computed values
   const isActive = useMemo(
-    () => pathname.startsWith(`/p/${project.id}`) || isEditing || isMenuOpen,
-    [pathname, project.id, isEditing, isMenuOpen]
+    () => isEditing || isMenuOpen,
+    [isEditing, isMenuOpen]
   )
 
   const displayName = useMemo(
@@ -265,7 +264,7 @@ export function SidebarProjectItem({ project }: SidebarProjectItemProps) {
       ) : (
         <>
           <Link
-            href={`/p/${project.id}`}
+            href="/"
             className="block w-full"
             prefetch
             onClick={handleLinkClick}

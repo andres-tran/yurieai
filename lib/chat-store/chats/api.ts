@@ -1,36 +1,14 @@
 import { readFromIndexedDB, writeToIndexedDB } from "@/lib/chat-store/persist"
 import type { Chat, Chats } from "@/lib/chat-store/types"
-// Backend removed
-import { MODEL_DEFAULT } from "../../config"
 import { fetchClient } from "../../fetch"
+import { MODEL_DEFAULT } from "../../config"
 import { API_ROUTE_UPDATE_CHAT_MODEL } from "../../routes"
 
-export async function getChatsForUserInDb(userId: string): Promise<Chats[]> {
-  return []
-}
+export async function updateChatTitleInDb(_id: string, _title: string) {}
 
-export async function updateChatTitleInDb(id: string, title: string) {
-  return
-}
+export async function deleteChatInDb(_id: string) {}
 
-export async function deleteChatInDb(id: string) {
-  return
-}
-
-export async function getAllUserChatsInDb(userId: string): Promise<Chats[]> {
-  return []
-}
-
-export async function createChatInDb(
-  userId: string,
-  title: string,
-  model: string,
-  systemPrompt: string
-): Promise<string | null> {
-  return null
-}
-
-export async function fetchAndCacheChats(userId: string): Promise<Chats[]> {
+export async function fetchAndCacheChats(_userId: string): Promise<Chats[]> {
   return await getCachedChats()
 }
 
@@ -67,33 +45,7 @@ export async function getChat(chatId: string): Promise<Chat | null> {
   return (all as Chat[]).find((c) => c.id === chatId) || null
 }
 
-export async function getUserChats(userId: string): Promise<Chat[]> {
-  const data = await getAllUserChatsInDb(userId)
-  if (!data) return []
-  await writeToIndexedDB("chats", data)
-  return data
-}
-
-export async function createChat(
-  userId: string,
-  title: string,
-  model: string,
-  systemPrompt: string
-): Promise<string> {
-  const id = await createChatInDb(userId, title, model, systemPrompt)
-  const finalId = id ?? crypto.randomUUID()
-
-  await writeToIndexedDB("chats", {
-    id: finalId,
-    title,
-    model,
-    user_id: userId,
-    system_prompt: systemPrompt,
-    created_at: new Date().toISOString(),
-  })
-
-  return finalId
-}
+// DB-backed chat creation/removal is disabled; chats are client-only
 
 export async function updateChatModel(chatId: string, model: string) {
   try {

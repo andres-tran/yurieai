@@ -1,9 +1,6 @@
-import { createChatInDb } from "./api"
-
 export async function POST(request: Request) {
   try {
-    const { userId, title, model, projectId } =
-      await request.json()
+    const { userId, title, model, projectId } = await request.json()
 
     if (!userId) {
       return new Response(JSON.stringify({ error: "Missing userId" }), {
@@ -11,12 +8,17 @@ export async function POST(request: Request) {
       })
     }
 
-    const chat = await createChatInDb({
-      userId,
-      title,
+    // Create ephemeral chat server-side is disabled; respond with client-only payload
+    const chat = {
+      id: crypto.randomUUID(),
+      user_id: userId,
+      title: title || "New Chat",
       model,
-      projectId,
-    })
+      project_id: projectId || null,
+      public: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
 
     return new Response(JSON.stringify({ chat }), { status: 200 })
   } catch (err: unknown) {

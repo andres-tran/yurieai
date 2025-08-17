@@ -1,10 +1,10 @@
-# Zola
+# Yurie
 
-[zola.chat](https://zola.chat)
+[yurie.chat](https://yurie.chat)
 
-**Zola** is the open-source chat interface for all your models.
+**Yurie** is the open-source chat interface for all your models.
 
-![zola cover](./public/cover_zola.jpg)
+![yurie cover](./public/cover_yurie.jpg)
 
 ## Features
 
@@ -21,19 +21,17 @@
 ### Option 1: With OpenAI (Cloud)
 
 ```bash
-git clone https://github.com/ibelick/zola.git
-cd zola
+git clone https://github.com/andres-tran/yurieai.git
+cd yurieai
 npm install
 echo "OPENAI_API_KEY=your-key" > .env.local
 npm run dev
 ```
 
 docker-compose up
-<!-- Ollama and BYOK removed -->
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ibelick/zola)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/andres-tran/yurieai)
 
-Auth has been removed in this fork. No database is required.
 
 ## Built with
 

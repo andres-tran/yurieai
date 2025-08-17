@@ -1,7 +1,7 @@
 import * as React from "react"
 import type { SVGProps } from "react"
 
-export function ZolaIcon(props: SVGProps<SVGSVGElement>) {
+export function YurieIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -12,9 +12,9 @@ export function ZolaIcon(props: SVGProps<SVGSVGElement>) {
       fill="none"
       {...props}
     >
-      <g clipPath="url(#zola)">
+      <g clipPath="url(#yurie)">
         <mask
-          id="zola"
+          id="yurie"
           width={80}
           height={80}
           x={0}
@@ -31,10 +31,12 @@ export function ZolaIcon(props: SVGProps<SVGSVGElement>) {
         </g>
       </g>
       <defs>
-        <clipPath id="zola">
+        <clipPath id="yurie">
           <path fill="currentColor" d="M0 0h80v80H0z" />
         </clipPath>
       </defs>
     </svg>
   )
 }
+
+

@@ -1,7 +1,7 @@
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { getAllModels } from "@/lib/models"
 import { Message as MessageAISDK, streamText, ToolSet } from "ai"
-import { validateAndTrackUsage } from "./api"
+// usage tracking removed
 import { createErrorResponse, extractErrorMessage } from "./utils"
 
 export const maxDuration = 60
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       )
     }
 
-    await validateAndTrackUsage()
+    // usage tracking removed
 
     const allModels = await getAllModels()
     const modelConfig = allModels.find((m) => m.id === model)

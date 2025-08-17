@@ -1,10 +1,7 @@
-import {
-  convertFromApiFormat,
-  defaultPreferences,
-} from "@/lib/user-preference-store/utils"
+import { defaultPreferences } from "@/lib/user-preference-store/utils"
 import type { UserProfile } from "./types"
 
-export async function getSupabaseUser() { return { supabase: null, user: null } }
+// Supabase/auth not implemented in this build
 
 export async function getUserProfile(): Promise<UserProfile | null> {
   // Return anonymous profile

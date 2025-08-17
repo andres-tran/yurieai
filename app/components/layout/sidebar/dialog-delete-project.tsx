@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { fetchClient } from "@/lib/fetch"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { usePathname, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 type Project = {
   id: string
@@ -33,7 +33,6 @@ export function DialogDeleteProject({
 }: DialogDeleteProjectProps) {
   const queryClient = useQueryClient()
   const router = useRouter()
-  const pathname = usePathname()
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
@@ -53,10 +52,8 @@ export function DialogDeleteProject({
       queryClient.invalidateQueries({ queryKey: ["chats"] })
       setIsOpen(false)
 
-      // If we're currently viewing this project, redirect to home
-      if (pathname.startsWith(`/p/${project.id}`)) {
-        router.push("/")
-      }
+      // Always redirect home after deletion
+      router.push("/")
     },
   })
 

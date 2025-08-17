@@ -8,11 +8,8 @@ import { ChatsProvider } from "@/lib/chat-store/chats/provider"
 import { ModelProvider } from "@/lib/model-store/provider"
 import { TanstackQueryProvider } from "@/lib/tanstack-query/tanstack-query-provider"
 import { UserPreferencesProvider } from "@/lib/user-preference-store/provider"
-import { UserProvider } from "@/lib/user-store/provider"
 import { getUserProfile } from "@/lib/user/api"
 import { ThemeProvider } from "next-themes"
-import Script from "next/script"
-import { LayoutClient } from "./layout-client"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +22,12 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.NEXT_PUBLIC_VERCEL_URL
+        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+        : "http://localhost:3000")
+  ),
   title: "Yurie",
   description:
     "Yurie is the open-source interface for AI chat. Multi-model and fully self-hostable. Use Claude, OpenAI, Gemini, local models, and more, all in one place.",
@@ -35,31 +38,21 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const isDev = process.env.NODE_ENV === "development"
-  const isOfficialDeployment = process.env.ZOLA_OFFICIAL === "true"
+  
   const userProfile = await getUserProfile()
 
   return (
     <html lang="en" suppressHydrationWarning>
-      {isOfficialDeployment ? (
-        <Script
-          defer
-          src="https://assets.onedollarstats.com/stonks.js"
-          {...(isDev ? { "data-debug": "zola.chat" } : {})}
-        />
-      ) : null}
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <TanstackQueryProvider>
-          <LayoutClient />
-          <UserProvider initialUser={userProfile}>
-            <ModelProvider>
-              <ChatsProvider userId={userProfile?.id}>
-                <UserPreferencesProvider
-                  userId={userProfile?.id}
-                  initialPreferences={userProfile?.preferences}
-                >
+          <ModelProvider>
+            <ChatsProvider userId={userProfile?.id}>
+              <UserPreferencesProvider
+                userId={userProfile?.id}
+                initialPreferences={userProfile?.preferences}
+              >
                     <TooltipProvider
                       delayDuration={200}
                       skipDelayDuration={500}
@@ -76,10 +69,9 @@ export default async function RootLayout({
                         </SidebarProvider>
                       </ThemeProvider>
                     </TooltipProvider>
-                  </UserPreferencesProvider>
-              </ChatsProvider>
-            </ModelProvider>
-          </UserProvider>
+                </UserPreferencesProvider>
+            </ChatsProvider>
+          </ModelProvider>
         </TanstackQueryProvider>
       </body>
     </html>

@@ -1,27 +1,9 @@
-import { APP_DOMAIN } from "@/lib/config"
 import type { UserProfile } from "@/lib/user/types"
 import { fetchClient } from "./fetch"
 import { API_ROUTE_UPDATE_CHAT_MODEL } from "./routes"
 
-/**
- * Creates a guest user record on the server
- */
-export async function createGuestUser(_guestId: string) { return { success: true } }
-
 export class UsageLimitError extends Error {}
 
-/**
- * Checks the user's daily usage and increments both overall and daily counters.
- * Resets the daily counter if a new day (UTC) is detected.
- * Uses the `anonymous` flag from the user record to decide which daily limit applies.
- *
- * @param supabase - Your Supabase client.
- * @param userId - The ID of the user.
- * @returns The remaining daily limit.
- */
-export async function checkRateLimits(_userId: string) {
-  return { remaining: Infinity, remainingPro: Infinity }
-}
 
 /**
  * Updates the model for an existing chat
@@ -61,7 +43,6 @@ export const getOrCreateGuestUserId = async (
     if (existing) return existing
 
     const guestId = crypto.randomUUID()
-    await createGuestUser(guestId)
     localStorage.setItem("guest_user_id", guestId)
     return guestId
   } catch (error) {

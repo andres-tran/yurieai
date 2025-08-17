@@ -1,18 +1,16 @@
 "use client"
 import { ButtonNewChat } from "@/app/components/layout/button-new-chat"
-import { UserMenu } from "@/app/components/layout/user-menu"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
-import { ZolaIcon } from "@/components/icons/zola"
+import { YurieIcon } from "@/components/icons/yurie"
 import { APP_NAME } from "@/lib/config"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
-import { useUser } from "@/lib/user-store/provider"
 import Link from "next/link"
 import { DialogPublish } from "./dialog-publish"
 import { HeaderSidebarTrigger } from "./header-sidebar-trigger"
 
 export function Header({ hasSidebar }: { hasSidebar: boolean }) {
   const isMobile = useBreakpoint(768)
-  const { user } = useUser()
+  const user = null
   const { preferences } = useUserPreferences()
 
   const isLoggedIn = !!user
@@ -27,7 +25,7 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
                 href="/"
                 className="pointer-events-auto inline-flex items-center text-xl font-medium tracking-tight"
               >
-                <ZolaIcon className="mr-1 size-4" />
+                <YurieIcon className="mr-1 size-4" />
                 {APP_NAME}
               </Link>
               {hasSidebar && isMobile && <HeaderSidebarTrigger />}
@@ -40,8 +38,6 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
             <div className="pointer-events-auto flex flex-1 items-center justify-end gap-2">
               <DialogPublish />
               <ButtonNewChat />
-              
-              <UserMenu />
             </div>
           )}
         </div>

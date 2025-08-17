@@ -16,7 +16,6 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 import { APP_NAME } from "@/lib/config"
-import { useUser } from "@/lib/user-store/provider"
 import { useMutation } from "@tanstack/react-query"
 import Image from "next/image"
 
@@ -31,7 +30,6 @@ export function ProModelDialog({
   setIsOpen,
   currentModel,
 }: ProModelDialogProps) {
-  const { user } = useUser()
   const isMobile = useBreakpoint(768)
   const mutation = useMutation({
     mutationFn: async () => {

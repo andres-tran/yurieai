@@ -21,16 +21,13 @@ type UseChatCoreProps = {
     files: File[]
   ) => Array<{ name: string; contentType: string; url: string }>
   setFiles: (files: File[]) => void
-  checkLimitsAndNotify: (uid: string) => Promise<boolean>
   cleanupOptimisticAttachments: (attachments?: Array<{ url?: string }>) => void
-  ensureChatExists: (uid: string, input: string) => Promise<string | null>
   handleFileUploads: (
     uid: string,
     chatId: string
   ) => Promise<Attachment[] | null>
   selectedModel: string
   clearDraft: () => void
-  bumpChat: (chatId: string) => void
 }
 
 export function useChatCore({
@@ -42,13 +39,10 @@ export function useChatCore({
   files,
   createOptimisticAttachments,
   setFiles,
-  checkLimitsAndNotify,
   cleanupOptimisticAttachments,
-  ensureChatExists,
   handleFileUploads,
   selectedModel,
   clearDraft,
-  bumpChat,
 }: UseChatCoreProps) {
   // State management
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -153,19 +147,11 @@ export function useChatCore({
     setFiles([])
 
     try {
-      const allowed = await checkLimitsAndNotify(uid)
-      if (!allowed) {
-        setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
-        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
-        return
-      }
-
-      const currentChatId = await ensureChatExists(uid, input)
-      if (!currentChatId) {
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
-        return
-      }
+      const currentChatId = chatId ?? (localStorage.getItem("guestChatId") || (() => {
+        const newId = crypto.randomUUID()
+        localStorage.setItem("guestChatId", newId)
+        return newId
+      })())
 
       if (input.length > MESSAGE_MAX_LENGTH) {
         toast({
@@ -205,10 +191,6 @@ export function useChatCore({
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
       clearDraft()
-
-      if (messages.length > 0) {
-        bumpChat(currentChatId)
-      }
     } catch {
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
@@ -224,9 +206,7 @@ export function useChatCore({
     setMessages,
     setInput,
     setFiles,
-    checkLimitsAndNotify,
     cleanupOptimisticAttachments,
-    ensureChatExists,
     handleFileUploads,
     selectedModel,
     isAuthenticated,
@@ -236,7 +216,7 @@ export function useChatCore({
     cacheAndAddMessage,
     clearDraft,
     messages.length,
-    bumpChat,
+    chatId,
     setIsSubmitting,
   ])
 
@@ -262,13 +242,11 @@ export function useChatCore({
           return
         }
 
-        const allowed = await checkLimitsAndNotify(uid)
-        if (!allowed) {
-          setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
-          return
-        }
-
-        const currentChatId = await ensureChatExists(uid, suggestion)
+        const currentChatId = chatId ?? (localStorage.getItem("guestChatId") || (() => {
+          const newId = crypto.randomUUID()
+          localStorage.setItem("guestChatId", newId)
+          return newId
+        })())
 
         if (!currentChatId) {
           setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
@@ -300,11 +278,10 @@ export function useChatCore({
       }
     },
     [
-      ensureChatExists,
+      chatId,
       selectedModel,
       user,
       append,
-      checkLimitsAndNotify,
       isAuthenticated,
       setMessages,
       setIsSubmitting,

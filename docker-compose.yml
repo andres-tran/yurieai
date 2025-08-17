@@ -1,5 +1,5 @@
 services:
-  zola:
+  yurie:
     build:
       context: .
       dockerfile: Dockerfile

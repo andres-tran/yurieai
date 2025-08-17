@@ -1,4 +1,4 @@
-import { ChatContainer } from "@/app/components/chat/chat-container"
+import { Chat } from "@/app/components/chat/chat"
 import { LayoutApp } from "@/app/components/layout/layout-app"
 import { MessagesProvider } from "@/lib/chat-store/messages/provider"
 
@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <MessagesProvider>
       <LayoutApp>
-        <ChatContainer />
+        <Chat />
       </LayoutApp>
     </MessagesProvider>
   )

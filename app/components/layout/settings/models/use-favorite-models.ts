@@ -1,7 +1,6 @@
 import { toast } from "@/components/ui/toast"
 import { fetchClient } from "@/lib/fetch"
 import { useModel } from "@/lib/model-store/provider"
-import { useUser } from "@/lib/user-store/provider"
 import { debounce } from "@/lib/utils"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useCallback, useRef } from "react"
@@ -14,7 +13,6 @@ export function useFavoriteModels() {
   const queryClient = useQueryClient()
   const { favoriteModels: initialFavoriteModels, refreshFavoriteModelsSilent } =
     useModel()
-  const { refreshUser } = useUser()
 
   // Ensure we always have an array
   const safeInitialData = Array.isArray(initialFavoriteModels)
@@ -111,7 +109,6 @@ export function useFavoriteModels() {
 
       // Also refresh ModelProvider and UserProvider on error to sync back with server state
       refreshFavoriteModelsSilent()
-      refreshUser()
     },
     onSuccess: () => {
       // Invalidate the cache to trigger a refetch
@@ -120,8 +117,7 @@ export function useFavoriteModels() {
       // Also refresh the ModelProvider's favorite models (silently)
       refreshFavoriteModelsSilent()
 
-      // Also refresh the UserProvider to update user.favorite_models
-      refreshUser()
+      // UserProvider removed
     },
   })
 

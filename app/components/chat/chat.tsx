@@ -4,18 +4,14 @@ import { ChatInput } from "@/app/components/chat-input/chat-input"
 import { Conversation } from "@/app/components/chat/conversation"
 import { useModel } from "@/app/components/chat/use-model"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
-import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 // Chat session routing removed
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
-import { useUserPreferences } from "@/lib/user-preference-store/provider"
-import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
 import { useCallback, useMemo, useState } from "react"
 import { useChatCore } from "./use-chat-core"
-import { useChatOperations } from "./use-chat-operations"
 import { useFileUpload } from "./use-file-upload"
 
 const FeedbackWidget = dynamic(
@@ -27,19 +23,11 @@ const FeedbackWidget = dynamic(
 
 export function Chat() {
   const chatId = null
-  const {
-    createNewChat,
-    getChatById,
-    updateChatModel,
-    bumpChat,
-    isLoading: isChatsLoading,
-  } = useChats()
 
   const currentChat = useMemo(() => null, [])
 
   const { messages: initialMessages, cacheAndAddMessage } = useMessages()
-  const { user } = useUser()
-  const { preferences } = useUserPreferences()
+  const user: { system_prompt?: string | null } | null = null
   const { draftValue, clearDraft } = useChatDraft(chatId)
 
   // File upload functionality
@@ -57,37 +45,11 @@ export function Chat() {
   const { selectedModel, handleModelChange } = useModel({
     currentChat: currentChat || null,
     user,
-    updateChatModel,
     chatId,
   })
 
-  // State to pass between hooks
-  const [hasDialogAuth, setHasDialogAuth] = useState(false)
   const isAuthenticated = false
-  const systemPrompt = useMemo(
-    () => user?.system_prompt || SYSTEM_PROMPT_DEFAULT,
-    [user?.system_prompt]
-  )
-
-  const createNewChatCompat = useCallback(
-    (
-      userId: string,
-      title?: string,
-      model?: string,
-      isAuthenticatedArg?: boolean,
-      systemPromptArg?: string,
-      projectIdArg?: string
-    ) =>
-      createNewChat(
-        userId,
-        title,
-        model,
-        isAuthenticatedArg,
-        systemPromptArg,
-        projectIdArg
-      ),
-    [createNewChat]
-  )
+  const systemPrompt = SYSTEM_PROMPT_DEFAULT
 
   // New state for quoted text
   const [quotedText, setQuotedText] = useState<{
@@ -101,19 +63,6 @@ export function Chat() {
     []
   )
 
-  // Chat operations (utils + handlers) - created first
-  const { checkLimitsAndNotify, ensureChatExists, handleDelete, handleEdit } =
-    useChatOperations({
-      isAuthenticated,
-      chatId,
-      messages: initialMessages,
-      selectedModel,
-      systemPrompt,
-      createNewChat: createNewChatCompat,
-      setHasDialogAuth,
-      setMessages: () => {},
-      setInput: () => {},
-    })
 
   // Core chat functionality (initialization + state + actions)
   const {
@@ -129,6 +78,7 @@ export function Chat() {
     handleSuggestion,
     handleReload,
     handleInputChange,
+    setMessages,
   } = useChatCore({
     initialMessages,
     draftValue,
@@ -138,13 +88,10 @@ export function Chat() {
     files,
     createOptimisticAttachments,
     setFiles,
-    checkLimitsAndNotify,
     cleanupOptimisticAttachments,
-    ensureChatExists,
     handleFileUploads,
     selectedModel,
     clearDraft,
-    bumpChat,
   })
 
   // Memoize the conversation props to prevent unnecessary rerenders
@@ -152,16 +99,19 @@ export function Chat() {
     () => ({
       messages,
       status,
-      onDelete: handleDelete,
-      onEdit: handleEdit,
+      onDelete: (id: string) =>
+        setMessages((prev) => prev.filter((m) => m.id !== id)),
+      onEdit: (id: string, newText: string) =>
+        setMessages((prev) =>
+          prev.map((m) => (m.id === id ? { ...m, content: newText } : m))
+        ),
       onReload: handleReload,
       onQuote: handleQuotedSelected,
     }),
     [
       messages,
       status,
-      handleDelete,
-      handleEdit,
+      setMessages,
       handleReload,
       handleQuotedSelected,
     ]
