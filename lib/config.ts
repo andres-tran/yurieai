@@ -8,14 +8,6 @@ import {
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr"
 
-export const NON_AUTH_DAILY_MESSAGE_LIMIT = 5
-export const AUTH_DAILY_MESSAGE_LIMIT = 1000
-export const REMAINING_QUERY_ALERT_THRESHOLD = 2
-export const DAILY_FILE_UPLOAD_LIMIT = 5
-export const DAILY_LIMIT_PRO_MODELS = 500
-
-export const NON_AUTH_ALLOWED_MODELS = ["gpt-5-nano"]
-
 export const FREE_MODELS_IDS = ["gpt-5-nano"]
 
 export const MODEL_DEFAULT = "gpt-5-nano"
