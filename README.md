@@ -18,8 +18,6 @@
 
 ## Quick Start
 
-### Option 1: With OpenAI (Cloud)
-
 ```bash
 git clone https://github.com/andres-tran/yurieai.git
 cd yurieai
@@ -27,8 +25,6 @@ npm install
 echo "OPENAI_API_KEY=your-key" > .env.local
 npm run dev
 ```
-
-docker-compose up
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/andres-tran/yurieai)
 
@@ -51,6 +47,4 @@ docker-compose up
 
 Apache License 2.0
 
-## Notes
-
-This is a beta release. The codebase is evolving and may change.
+ 
