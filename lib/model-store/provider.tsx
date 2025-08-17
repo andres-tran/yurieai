@@ -2,6 +2,7 @@
 
 import { fetchClient } from "@/lib/fetch"
 import { ModelConfig } from "@/lib/models/types"
+import { MODELS } from "@/lib/models"
 import {
   createContext,
   useCallback,
@@ -39,13 +40,14 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
 
   const fetchModels = useCallback(async () => {
     try {
-      const response = await fetchClient("/api/models")
-      if (response.ok) {
-        const data = await response.json()
-        setModels(data.models || [])
-      }
+      // Load models directly from in-memory static list and mark accessible
+      const models: ModelConfig[] = MODELS.map((m) => ({
+        ...m,
+        accessible: true,
+      }))
+      setModels(models)
     } catch (error) {
-      console.error("Failed to fetch models:", error)
+      console.error("Failed to load models:", error)
     }
   }, [])
 

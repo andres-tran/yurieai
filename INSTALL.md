@@ -22,7 +22,6 @@ OPENAI_API_KEY=your_openai_api_key
 # NEXT_PUBLIC_VERCEL_URL=your_vercel_domain
 ```
 
-No authentication or database is required in this build.
 
 ### Recommended OpenAI Models
 
@@ -114,7 +113,3 @@ You can customize various aspects of Yurie by modifying the configuration files:
 
 - GitHub Issues: Report bugs or request features
 - GitHub Discussions: Ask questions and share ideas
-
-## License
-
-Apache License 2.0

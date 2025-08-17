@@ -4,7 +4,7 @@ import { useTheme } from "next-themes"
 import { useState } from "react"
 
 export function ThemeSelection() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, systemTheme } = useTheme()
   const [selectedTheme, setSelectedTheme] = useState(theme || "system")
 
   const themes = [
@@ -40,7 +40,12 @@ export function ThemeSelection() {
                 />
               ))}
             </div>
-            <p className="text-left text-sm font-medium">{theme.name}</p>
+            <p className="text-left text-sm font-medium">
+              {theme.name}
+              {theme.id === "system" && systemTheme
+                ? ` (${systemTheme})`
+                : ""}
+            </p>
           </button>
         ))}
       </div>

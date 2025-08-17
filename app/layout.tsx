@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ChatsProvider } from "@/lib/chat-store/chats/provider"
@@ -59,14 +58,12 @@ export default async function RootLayout({
                     >
                       <ThemeProvider
                         attribute="class"
-                        defaultTheme="light"
+                        defaultTheme="system"
                         enableSystem
                         disableTransitionOnChange
                       >
-                        <SidebarProvider defaultOpen>
-                          <Toaster position="top-center" />
-                          {children}
-                        </SidebarProvider>
+                        <Toaster position="top-center" />
+                        {children}
                       </ThemeProvider>
                     </TooltipProvider>
                 </UserPreferencesProvider>

@@ -3,8 +3,6 @@ import { NextResponse, type NextRequest } from "next/server"
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
 
-  // CSRF disabled in this build
-
   // CSP for development and production
   const isDev = process.env.NODE_ENV === "development"
 
@@ -22,5 +20,4 @@ export const config = {
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
-  runtime: "nodejs",
 }

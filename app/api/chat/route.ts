@@ -44,7 +44,17 @@ export async function POST(req: Request) {
 
     const effectiveSystemPrompt = systemPrompt || SYSTEM_PROMPT_DEFAULT
 
-    const apiKey: string | undefined = undefined
+    const apiKey: string | undefined = process.env.OPENAI_API_KEY
+    if (!apiKey) {
+      console.error("Missing OPENAI_API_KEY in server environment")
+      return new Response(
+        JSON.stringify({
+          error:
+            "Server is not configured with OPENAI_API_KEY. Add it to .env.local and restart.",
+        }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      )
+    }
 
     const result = streamText({
       model: modelConfig.apiSdk(apiKey, { enableSearch }),

@@ -50,6 +50,7 @@ export function MessageAssistant({
     (part) => part.type === "tool-invocation"
   )
   const reasoningParts = parts?.find((part) => part.type === "reasoning")
+  const reasoningText = (reasoningParts as any)?.reasoning ?? (reasoningParts as any)?.text
   const contentNullOrEmpty = children === null || children === ""
   const isLastStreaming = status === "streaming" && isLast
   const searchImageResults =
@@ -99,9 +100,9 @@ export function MessageAssistant({
         )}
         {...(isQuoteEnabled && { "data-message-id": messageId })}
       >
-        {reasoningParts && reasoningParts.reasoning && (
+        {reasoningText && (
           <Reasoning
-            reasoning={reasoningParts.reasoning}
+            reasoning={reasoningText}
             isStreaming={status === "streaming"}
           />
         )}

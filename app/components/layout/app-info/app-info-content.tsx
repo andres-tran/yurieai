@@ -2,18 +2,30 @@ export function AppInfoContent() {
   return (
     <div className="space-y-4">
       <p className="text-foreground leading-relaxed">
-        <span className="font-medium">Yurie</span> is the open-source interface
-        for AI chat.
+        <span className="font-medium">Yurie</span> is the open-source chat
+        interface.
         <br />
-        Multi-model and fully self-hostable.
+        Use OpenAI models with a clean, fast UI.
         <br />
-        Use Claude, OpenAI, Gemini, local models, and more, all in one place.
+        Open-source and self-hostable.
         <br />
+      </p>
+      <p className="text-foreground leading-relaxed">
+        Visit {""}
+        <a
+          href="https://yurie.ai"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+        >
+          yurie.ai
+        </a>
+        .
       </p>
       <p className="text-foreground leading-relaxed">
         The code is available on{" "}
         <a
-          href="https://github.com/ibelick/yurie"
+          href="https://github.com/andres-tran/yurieai"
           target="_blank"
           rel="noopener noreferrer"
           className="underline"

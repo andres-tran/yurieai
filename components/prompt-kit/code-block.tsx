@@ -35,7 +35,7 @@ export type CodeBlockCodeProps = {
 function CodeBlockCode({
   code,
   language = "tsx",
-  theme = "github-light",
+  theme,
   className,
   ...props
 }: CodeBlockCodeProps) {
@@ -44,14 +44,23 @@ function CodeBlockCode({
 
   useEffect(() => {
     async function highlight() {
-      const html = await codeToHtml(code, {
+      const effectiveTheme =
+        theme ?? (appTheme === "dark" ? "github-dark" : "github-light")
+
+      const html = await codeToHtml(code ?? "", {
         lang: language,
-        theme: appTheme === "dark" ? "github-dark" : "github-light",
+        theme: effectiveTheme,
       })
       setHighlightedHtml(html)
     }
-    highlight()
-  }, [code, language, appTheme])
+    let cancelled = false
+    highlight().then(() => {
+      if (cancelled) setHighlightedHtml((prev) => prev)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [code, language, appTheme, theme])
 
   const classNames = cn(
     "w-full overflow-x-auto text-[13px] [&>pre]:px-4 [&>pre]:py-4 [&>pre]:!bg-background",
@@ -61,6 +70,7 @@ function CodeBlockCode({
   // SSR fallback: render plain code if not hydrated yet
   return highlightedHtml ? (
     <div
+      suppressHydrationWarning
       className={classNames}
       dangerouslySetInnerHTML={{ __html: highlightedHtml }}
       {...props}

@@ -105,6 +105,24 @@ export function useChatCore({
     }
   }, [prompt, setInput])
 
+  // Clear chat when a global clear event is dispatched (e.g., clicking the logo)
+  useEffect(() => {
+    const handleClear = () => {
+      setMessages([])
+      setInput("")
+      setFiles([])
+      clearDraft()
+    }
+    if (typeof window !== "undefined") {
+      window.addEventListener("clear-chat", handleClear)
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("clear-chat", handleClear)
+      }
+    }
+  }, [setMessages, setInput, setFiles, clearDraft])
+
   // Reset messages when navigating from a chat to home
   useEffect(() => {
     if (
@@ -186,7 +204,13 @@ export function useChatCore({
         experimental_attachments: attachments || undefined,
       }
 
-      handleSubmit(undefined, options)
+      append(
+        {
+          role: "user",
+          content: optimisticMessage.content,
+        },
+        options
+      )
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
       cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
       cacheAndAddMessage(optimisticMessage)
@@ -213,6 +237,7 @@ export function useChatCore({
     systemPrompt,
     enableSearch,
     handleSubmit,
+    append,
     cacheAndAddMessage,
     clearDraft,
     messages.length,
@@ -295,17 +320,39 @@ export function useChatCore({
       return
     }
 
+    const currentChatId =
+      chatId ??
+      (localStorage.getItem("guestChatId") ||
+        (() => {
+          const newId = crypto.randomUUID()
+          localStorage.setItem("guestChatId", newId)
+          return newId
+        })())
+
+    if (!currentChatId) {
+      return
+    }
+
     const options = {
       body: {
-        chatId,
+        chatId: currentChatId,
         userId: uid,
         model: selectedModel,
         systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
+        enableSearch,
       },
     }
 
     reload(options)
-  }, [user, chatId, selectedModel, isAuthenticated, systemPrompt, reload])
+  }, [
+    user,
+    chatId,
+    selectedModel,
+    isAuthenticated,
+    systemPrompt,
+    enableSearch,
+    reload,
+  ])
 
   // Handle input change - now with access to the real setInput function!
   const { setDraftValue } = useChatDraft(chatId)

@@ -1,6 +1,6 @@
 # Yurie
 
-[yurie.chat](https://yurie.chat)
+[yurie.ai](https://yurie.ai)
 
 **Yurie** is the open-source chat interface for all your models.
 
@@ -35,16 +35,3 @@ npm run dev
 - [shadcn/ui](https://ui.shadcn.com) — core components
 - [motion-primitives](https://motion-primitives.com) — animated components
 - [vercel ai sdk](https://vercel.com/blog/introducing-the-vercel-ai-sdk) — model integration, AI features
- 
-
-## Sponsors
-
-<a href="https://vercel.com/oss">
-  <img alt="Vercel OSS Program" src="https://vercel.com/oss/program-badge.svg" />
-</a>
-
-## License
-
-Apache License 2.0
-
- 

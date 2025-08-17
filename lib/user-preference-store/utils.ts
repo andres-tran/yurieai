@@ -1,4 +1,4 @@
-export type LayoutType = "sidebar" | "fullscreen"
+export type LayoutType = "fullscreen"
 
 export type UserPreferences = {
   layout: LayoutType
@@ -19,7 +19,7 @@ export const defaultPreferences: UserPreferences = {
 // Helper functions to convert between API format (snake_case) and frontend format (camelCase)
 export function convertFromApiFormat(apiData: any): UserPreferences {
   return {
-    layout: apiData.layout || "fullscreen",
+    layout: "fullscreen",
     promptSuggestions: true,
     showToolInvocations: apiData.show_tool_invocations ?? true,
     showConversationPreviews: apiData.show_conversation_previews ?? true,
@@ -29,7 +29,7 @@ export function convertFromApiFormat(apiData: any): UserPreferences {
 
 export function convertToApiFormat(preferences: Partial<UserPreferences>) {
   const apiData: any = {}
-  if (preferences.layout !== undefined) apiData.layout = preferences.layout
+  if (preferences.layout !== undefined) apiData.layout = "fullscreen"
   // promptSuggestions always enabled; don't persist
   if (preferences.showToolInvocations !== undefined)
     apiData.show_tool_invocations = preferences.showToolInvocations

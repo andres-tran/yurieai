@@ -61,10 +61,19 @@ const INITIAL_COMPONENTS: Partial<Components> = {
         </CodeBlockGroup>
         <div className="sticky top-16 lg:top-0">
           <div className="absolute right-0 bottom-0 flex h-9 items-center pr-1.5">
-            <ButtonCopy code={children as string} />
+            <ButtonCopy code={(typeof children === "string" ? children : Array.isArray(children) ? children.join("") : String(children ?? ""))} />
           </div>
         </div>
-        <CodeBlockCode code={children as string} language={language} />
+        <CodeBlockCode
+          code={
+            typeof children === "string"
+              ? children
+              : Array.isArray(children)
+              ? children.join("")
+              : String(children ?? "")
+          }
+          language={language}
+        />
       </CodeBlock>
     )
   },

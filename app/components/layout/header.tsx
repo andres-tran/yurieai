@@ -1,17 +1,12 @@
 "use client"
-import { ButtonNewChat } from "@/app/components/layout/button-new-chat"
-import { useBreakpoint } from "@/app/hooks/use-breakpoint"
-import { YurieIcon } from "@/components/icons/yurie"
-import { APP_NAME } from "@/lib/config"
-import { useUserPreferences } from "@/lib/user-preference-store/provider"
+import { useChatDraft } from "@/app/hooks/use-chat-draft"
+import { useMessages } from "@/lib/chat-store/messages/provider"
 import Link from "next/link"
 import { DialogPublish } from "./dialog-publish"
-import { HeaderSidebarTrigger } from "./header-sidebar-trigger"
-
-export function Header({ hasSidebar }: { hasSidebar: boolean }) {
-  const isMobile = useBreakpoint(768)
+export function Header() {
   const user = null
-  const { preferences } = useUserPreferences()
+  const { resetMessages } = useMessages()
+  const { clearDraft } = useChatDraft(null)
 
   const isLoggedIn = !!user
 
@@ -23,12 +18,18 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
             <div className="flex flex-1 items-center gap-2">
               <Link
                 href="/"
-                className="pointer-events-auto inline-flex items-center text-xl font-medium tracking-tight"
+                className="pointer-events-auto inline-flex items-center"
+                onClick={() => {
+                  resetMessages()
+                  clearDraft()
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new Event("clear-chat"))
+                  }
+                }}
               >
-                <YurieIcon className="mr-1 size-4" />
-                {APP_NAME}
+                <img src="/favicon.ico" alt="Yurie" width={32} height={32} />
               </Link>
-              {hasSidebar && isMobile && <HeaderSidebarTrigger />}
+              
             </div>
           </div>
           <div />
@@ -37,7 +38,6 @@ export function Header({ hasSidebar }: { hasSidebar: boolean }) {
           ) : (
             <div className="pointer-events-auto flex flex-1 items-center justify-end gap-2">
               <DialogPublish />
-              <ButtonNewChat />
             </div>
           )}
         </div>

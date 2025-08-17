@@ -186,10 +186,8 @@ export function UserPreferencesProvider({
 
   const updatePreferences = mutation.mutate
 
-  const setLayout = (layout: LayoutType) => {
-    if (isAuthenticated || layout === "fullscreen") {
-      updatePreferences({ layout })
-    }
+  const setLayout = (_layout: LayoutType) => {
+    updatePreferences({ layout: "fullscreen" })
   }
 
   

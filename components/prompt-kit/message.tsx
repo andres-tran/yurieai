@@ -1,4 +1,3 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Tooltip,
   TooltipContent,
@@ -20,30 +19,7 @@ const Message = ({ children, className, ...props }: MessageProps) => (
   </div>
 )
 
-export type MessageAvatarProps = {
-  src: string
-  alt: string
-  fallback?: string
-  delayMs?: number
-  className?: string
-}
-
-const MessageAvatar = ({
-  src,
-  alt,
-  fallback,
-  delayMs,
-  className,
-}: MessageAvatarProps) => {
-  return (
-    <Avatar className={cn("h-8 w-8 shrink-0", className)}>
-      <AvatarImage src={src} alt={alt} />
-      {fallback && (
-        <AvatarFallback delayMs={delayMs}>{fallback}</AvatarFallback>
-      )}
-    </Avatar>
-  )
-}
+// Avatar removed
 
 export type MessageContentProps = {
   children: React.ReactNode
@@ -116,4 +92,4 @@ const MessageAction = ({
   )
 }
 
-export { Message, MessageAvatar, MessageContent, MessageActions, MessageAction }
+export { Message, MessageContent, MessageActions, MessageAction }

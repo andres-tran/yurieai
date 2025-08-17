@@ -1,6 +1,6 @@
 import useClickOutside from "@/components/motion-primitives/useClickOutside"
 import { Button } from "@/components/ui/button"
-import { Quote } from "lucide-react"
+import { Quotes } from "@phosphor-icons/react"
 import { RefObject, useRef } from "react"
 
 type QuoteButtonProps = {
@@ -43,7 +43,7 @@ export function QuoteButton({
         className="flex size-10 items-center gap-1 rounded-full px-3 py-1 text-base"
         aria-label="Ask follow up"
       >
-        <Quote className="size-4" />
+        <Quotes className="size-4" />
       </Button>
     </div>
   )
