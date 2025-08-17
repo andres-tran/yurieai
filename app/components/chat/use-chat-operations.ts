@@ -13,7 +13,9 @@ type UseChatOperationsProps = {
     userId: string,
     title?: string,
     model?: string,
-    systemPrompt?: string
+    isAuthenticated?: boolean,
+    systemPrompt?: string,
+    projectId?: string
   ) => Promise<Chats | undefined>
   setHasDialogAuth: (value: boolean) => void
   setMessages: (
@@ -45,7 +47,13 @@ export function useChatOperations({
 
     if (messages.length === 0) {
       try {
-        const newChat = await createNewChat(userId, input, selectedModel, systemPrompt)
+        const newChat = await createNewChat(
+          userId,
+          input,
+          selectedModel,
+          isAuthenticated,
+          systemPrompt
+        )
 
         if (!newChat) return null
         localStorage.setItem("guestChatId", newChat.id)

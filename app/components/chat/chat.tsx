@@ -74,9 +74,19 @@ export function Chat() {
       userId: string,
       title?: string,
       model?: string,
-      systemPromptArg?: string
-    ) => createNewChat(userId, title, model, isAuthenticated, systemPromptArg),
-    [createNewChat, isAuthenticated]
+      isAuthenticatedArg?: boolean,
+      systemPromptArg?: string,
+      projectIdArg?: string
+    ) =>
+      createNewChat(
+        userId,
+        title,
+        model,
+        isAuthenticatedArg,
+        systemPromptArg,
+        projectIdArg
+      ),
+    [createNewChat]
   )
 
   // New state for quoted text
