@@ -13,8 +13,7 @@
 - Clean, responsive UI with light/dark themes
 - Built with Tailwind CSS, shadcn/ui, and prompt-kit
 - Open-source and self-hostable
-- Customizable: user system prompt, multiple layout options
-- Full MCP support (wip)
+- Customizable: user system prompt, simple fullscreen layout
 
 ## Quick Start
 

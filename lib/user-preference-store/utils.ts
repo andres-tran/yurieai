@@ -1,7 +1,5 @@
-export type LayoutType = "fullscreen"
-
 export type UserPreferences = {
-  layout: LayoutType
+  layout: "fullscreen"
   promptSuggestions: boolean
   showToolInvocations: boolean
   showConversationPreviews: boolean

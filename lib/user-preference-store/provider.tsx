@@ -6,23 +6,15 @@ import {
   convertFromApiFormat,
   convertToApiFormat,
   defaultPreferences,
-  type LayoutType,
   type UserPreferences,
 } from "./utils"
 
-export {
-  type LayoutType,
-  type UserPreferences,
-  convertFromApiFormat,
-  convertToApiFormat,
-}
+export { type UserPreferences, convertFromApiFormat, convertToApiFormat }
 
 const PREFERENCES_STORAGE_KEY = "user-preferences"
-const LAYOUT_STORAGE_KEY = "preferred-layout"
 
 interface UserPreferencesContextType {
   preferences: UserPreferences
-  setLayout: (layout: LayoutType) => void
   setShowToolInvocations: (enabled: boolean) => void
   setShowConversationPreviews: (enabled: boolean) => void
   toggleModelVisibility: (modelId: string) => void
@@ -69,23 +61,15 @@ function getLocalStoragePreferences(): UserPreferences {
   if (stored) {
     try {
       return JSON.parse(stored)
-    } catch {
-      // fallback to legacy layout storage if JSON parsing fails
-    }
+    } catch {}
   }
-
-  const layout = localStorage.getItem(LAYOUT_STORAGE_KEY) as LayoutType | null
-  return {
-    ...defaultPreferences,
-    ...(layout ? { layout } : {}),
-  }
+  return defaultPreferences
 }
 
 function saveToLocalStorage(preferences: UserPreferences) {
   if (typeof window === "undefined") return
 
   localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(preferences))
-  localStorage.setItem(LAYOUT_STORAGE_KEY, preferences.layout)
 }
 
 export function UserPreferencesProvider({
@@ -186,12 +170,6 @@ export function UserPreferencesProvider({
 
   const updatePreferences = mutation.mutate
 
-  const setLayout = (_layout: LayoutType) => {
-    updatePreferences({ layout: "fullscreen" })
-  }
-
-  
-
   const setShowToolInvocations = (enabled: boolean) => {
     updatePreferences({ showToolInvocations: enabled })
   }
@@ -220,7 +198,6 @@ export function UserPreferencesProvider({
     <UserPreferencesContext.Provider
       value={{
         preferences,
-        setLayout,
         setShowToolInvocations,
         setShowConversationPreviews,
         toggleModelVisibility,
