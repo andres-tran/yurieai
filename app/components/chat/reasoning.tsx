@@ -13,7 +13,7 @@ const TRANSITION = {
   type: "spring",
   duration: 0.2,
   bounce: 0,
-}
+} as const
 
 export function Reasoning({ reasoning, isStreaming }: ReasoningProps) {
   const [wasStreaming, setWasStreaming] = useState(isStreaming ?? false)

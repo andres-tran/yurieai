@@ -17,7 +17,7 @@ const TRANSITION = {
   type: "spring",
   duration: 0.2,
   bounce: 0,
-}
+} as const
 
 export function SourcesList({ sources, className }: SourcesListProps) {
   const [isExpanded, setIsExpanded] = useState(false)
