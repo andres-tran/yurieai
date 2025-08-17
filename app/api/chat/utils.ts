@@ -191,12 +191,10 @@ export function handleStreamError(err: unknown): ApiError {
         code: "AUTHENTICATION_ERROR",
       })
     } else if (aiError.statusCode === 429) {
-      // Rate limit
-      const message =
-        detailedMessage || "Rate limit exceeded. Please try again later."
+      const message = detailedMessage || "Please try again later."
       return Object.assign(new Error(message), {
         statusCode: 429,
-        code: "RATE_LIMIT_EXCEEDED",
+        code: "REQUEST_LIMIT",
       })
     } else if (aiError.statusCode >= 400 && aiError.statusCode < 500) {
       // Other client errors
@@ -257,10 +255,9 @@ export function extractErrorMessage(error: unknown): string {
     ) {
       return "Insufficient credits or payment required."
     } else if (
-      error.message.includes("429") ||
-      error.message.includes("rate limit")
+      error.message.includes("429")
     ) {
-      return "Rate limit exceeded. Please try again later."
+      return "Please try again later."
     }
 
     return error.message

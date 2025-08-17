@@ -1,6 +1,5 @@
 "use client"
 
-import { PopoverContentAuth } from "@/app/components/chat-input/popover-content-auth"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { useKeyShortcut } from "@/app/hooks/use-key-shortcut"
 import { Button } from "@/components/ui/button"
@@ -40,7 +39,6 @@ import {
 import { AnimatePresence, motion } from "motion/react"
 import { useRef, useState } from "react"
 import { ProModelDialog } from "../model-selector/pro-dialog"
-import { SubMenu } from "../model-selector/sub-menu"
 
 type MultiModelSelectorProps = {
   selectedModelIds: string[]
@@ -65,7 +63,6 @@ export function MultiModelSelector({
   )
   const isMobile = useBreakpoint(768)
 
-  const [hoveredModel, setHoveredModel] = useState<string | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isProDialogOpen, setIsProDialogOpen] = useState(false)
@@ -118,14 +115,14 @@ export function MultiModelSelector({
         )}
         onClick={() => handleModelToggle(model.id, isLocked)}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Checkbox
             checked={isSelected}
             disabled={isLocked || (!isSelected && isAtLimit)}
             onClick={(e) => e.stopPropagation()}
             onChange={() => handleModelToggle(model.id, isLocked)}
           />
-          {provider?.icon && <provider.icon className="size-5" />}
+          {provider?.icon && <provider.icon className="size-4" />}
           <div className="flex flex-col gap-0">
             <span className="text-sm">{model.name}</span>
           </div>
@@ -147,11 +144,8 @@ export function MultiModelSelector({
     )
   }
 
-  // Get the hovered model data
-  const hoveredModelData = models.find((model) => model.id === hoveredModel)
-
   const filteredModels = filterAndSortModels(
-    models,
+    models.filter((m) => m.providerId === "openai"),
     favoriteModels || [],
     searchQuery,
     isModelHidden
@@ -165,7 +159,7 @@ export function MultiModelSelector({
     <Button
       variant="outline"
       className={cn(
-        "dark:bg-secondary min-w-[200px] justify-between rounded-full",
+        "dark:bg-secondary min-w-[200px] justify-between rounded-full px-4",
         className
       )}
       disabled={isLoadingModels}
@@ -303,33 +297,7 @@ export function MultiModelSelector({
     setSearchQuery(e.target.value)
   }
 
-  // If user is not authenticated, show the auth popover
-  if (!isUserAuthenticated) {
-    return (
-      <Popover>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <PopoverTrigger asChild>
-              <Button
-                size="sm"
-                variant="secondary"
-                className={cn(
-                  "border-border dark:bg-secondary text-accent-foreground h-9 w-auto border bg-transparent",
-                  className
-                )}
-                type="button"
-              >
-                <span>Select models</span>
-                <CaretDownIcon className="size-4" />
-              </Button>
-            </PopoverTrigger>
-          </TooltipTrigger>
-          <TooltipContent>Select models</TooltipContent>
-        </Tooltip>
-        <PopoverContentAuth />
-      </Popover>
-    )
-  }
+  // Auth removed: always allow multi-model selection
 
   if (isMobile) {
     return (
@@ -374,14 +342,7 @@ export function MultiModelSelector({
                   <p className="text-muted-foreground mb-2 text-sm">
                     No results found.
                   </p>
-                  <a
-                    href="https://github.com/ibelick/zola/issues/new?title=Model%20Request%3A%20"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground text-sm underline"
-                  >
-                    Request a new model
-                  </a>
+                  <p className="text-muted-foreground text-sm">Request a new model</p>
                 </div>
               )}
             </div>
@@ -404,11 +365,7 @@ export function MultiModelSelector({
           onOpenChange={(open) => {
             setIsDropdownOpen(open)
             if (!open) {
-              setHoveredModel(null)
               setSearchQuery("")
-            } else {
-              if (selectedModelIds.length > 0)
-                setHoveredModel(selectedModelIds[0])
             }
           }}
         >
@@ -419,7 +376,7 @@ export function MultiModelSelector({
             Select models ⌘⇧M ({selectedModelIds.length}/{maxModels})
           </TooltipContent>
           <DropdownMenuContent
-            className="flex h-[320px] w-[300px] flex-col space-y-0.5 overflow-visible p-0"
+            className="flex h-[280px] w-[300px] flex-col space-y-1 overflow-visible px-3 py-2"
             align="start"
             sideOffset={4}
             forceMount
@@ -440,7 +397,7 @@ export function MultiModelSelector({
                 />
               </div>
             </div>
-            <div className="flex h-full flex-col space-y-0 overflow-y-auto px-1 pt-0 pb-0">
+            <div className="flex h-full flex-col space-y-1.5 overflow-y-auto px-2 pt-0 pb-0">
               {isLoadingModels ? (
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                   <p className="text-muted-foreground mb-2 text-sm">
@@ -466,19 +423,9 @@ export function MultiModelSelector({
                         e.preventDefault()
                         handleModelToggle(model.id, isLocked)
                       }}
-                      onFocus={() => {
-                        if (isDropdownOpen) {
-                          setHoveredModel(model.id)
-                        }
-                      }}
-                      onMouseEnter={() => {
-                        if (isDropdownOpen) {
-                          setHoveredModel(model.id)
-                        }
-                      }}
                     >
-                      <div className="flex items-center gap-3">
-                        {provider?.icon && <provider.icon className="size-5" />}
+                      <div className="flex items-center gap-2.5">
+                        {provider?.icon && <provider.icon className="size-4" />}
                         <div className="flex flex-col gap-0">
                           <span className="text-sm">{model.name}</span>
                         </div>
@@ -499,24 +446,12 @@ export function MultiModelSelector({
                   <p className="text-muted-foreground mb-1 text-sm">
                     No results found.
                   </p>
-                  <a
-                    href="https://github.com/ibelick/zola/issues/new?title=Model%20Request%3A%20"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground text-sm underline"
-                  >
-                    Request a new model
-                  </a>
+                  <p className="text-muted-foreground text-sm">Request a new model</p>
                 </div>
               )}
             </div>
 
-            {/* Submenu positioned absolutely */}
-            {hoveredModelData && (
-              <div className="absolute top-0 left-[calc(100%+8px)]">
-                <SubMenu hoveredModelData={hoveredModelData} />
-              </div>
-            )}
+            
           </DropdownMenuContent>
         </DropdownMenu>
       </Tooltip>

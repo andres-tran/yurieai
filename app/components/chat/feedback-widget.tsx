@@ -7,7 +7,6 @@ import {
   MorphingPopoverContent,
   MorphingPopoverTrigger,
 } from "@/components/motion-primitives/morphing-popover"
-import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { QuestionMark } from "@phosphor-icons/react"
 import { motion } from "motion/react"
 import { useState } from "react"
@@ -23,20 +22,14 @@ type FeedbackWidgetProps = {
 }
 
 export function FeedbackWidget({ authUserId }: FeedbackWidgetProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const isMobileOrTablet = useBreakpoint(896)
-
-  if (!isSupabaseEnabled) {
-    return null
-  }
+  void authUserId
+  return null
 
   const closeMenu = () => {
     setIsOpen(false)
   }
 
-  if (isMobileOrTablet || !authUserId) {
-    return null
-  }
+  if (isMobileOrTablet) return null
 
   return (
     <div className="fixed right-1 bottom-1 z-50">
@@ -75,7 +68,7 @@ export function FeedbackWidget({ authUserId }: FeedbackWidgetProps) {
             transformOrigin: "bottom right",
           }}
         >
-          <FeedbackForm authUserId={authUserId} onClose={closeMenu} />
+          <FeedbackForm onClose={closeMenu} />
         </MorphingPopoverContent>
       </MorphingPopover>
     </div>

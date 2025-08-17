@@ -2,10 +2,10 @@ export function AppInfoContent() {
   return (
     <div className="space-y-4">
       <p className="text-foreground leading-relaxed">
-        <span className="font-medium">Zola</span> is the open-source interface
+        <span className="font-medium">Yurie</span> is the open-source interface
         for AI chat.
         <br />
-        Multi-model, BYOK-ready, and fully self-hostable.
+        Multi-model and fully self-hostable.
         <br />
         Use Claude, OpenAI, Gemini, local models, and more, all in one place.
         <br />

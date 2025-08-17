@@ -1,7 +1,7 @@
 "use client"
 
 import { toast } from "@/components/ui/toast"
-import { useChatSession } from "@/lib/chat-store/session/provider"
+// Chat session removed
 import type { Message as MessageAISDK } from "ai"
 import { createContext, useContext, useEffect, useState } from "react"
 import { writeToIndexedDB } from "../persist"
@@ -36,79 +36,31 @@ export function useMessages() {
 export function MessagesProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<MessageAISDK[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const { chatId } = useChatSession()
+  const chatId = null
 
   useEffect(() => {
-    if (chatId === null) {
-      setMessages([])
-      setIsLoading(false)
-    }
-  }, [chatId])
+    setMessages([])
+    setIsLoading(false)
+  }, [])
 
   useEffect(() => {
-    if (!chatId) return
-
-    const load = async () => {
-      setIsLoading(true)
-      const cached = await getCachedMessages(chatId)
-      setMessages(cached)
-
-      try {
-        const fresh = await getMessagesFromDb(chatId)
-        setMessages(fresh)
-        cacheMessages(chatId, fresh)
-      } catch (error) {
-        console.error("Failed to fetch messages:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    load()
-  }, [chatId])
+    setIsLoading(false)
+  }, [])
 
   const refresh = async () => {
-    if (!chatId) return
-
-    try {
-      const fresh = await getMessagesFromDb(chatId)
-      setMessages(fresh)
-    } catch {
-      toast({ title: "Failed to refresh messages", status: "error" })
-    }
+    setMessages([])
   }
 
   const cacheAndAddMessage = async (message: MessageAISDK) => {
-    if (!chatId) return
-
-    try {
-      setMessages((prev) => {
-        const updated = [...prev, message]
-        writeToIndexedDB("messages", { id: chatId, messages: updated })
-        return updated
-      })
-    } catch {
-      toast({ title: "Failed to save message", status: "error" })
-    }
+    setMessages((prev) => [...prev, message])
   }
 
   const saveAllMessages = async (newMessages: MessageAISDK[]) => {
-    // @todo: manage the case where the chatId is null (first time the user opens the chat)
-    if (!chatId) return
-
-    try {
-      await saveMessages(chatId, newMessages)
-      setMessages(newMessages)
-    } catch {
-      toast({ title: "Failed to save messages", status: "error" })
-    }
+    setMessages(newMessages)
   }
 
   const deleteMessages = async () => {
-    if (!chatId) return
-
     setMessages([])
-    await clearMessagesForChat(chatId)
   }
 
   const resetMessages = async () => {

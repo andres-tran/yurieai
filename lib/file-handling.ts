@@ -1,9 +1,6 @@
 import { toast } from "@/components/ui/toast"
-import { SupabaseClient } from "@supabase/supabase-js"
 import * as fileType from "file-type"
 import { DAILY_FILE_UPLOAD_LIMIT } from "./config"
-import { createClient } from "./supabase/client"
-import { isSupabaseEnabled } from "./supabase/config"
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
@@ -51,27 +48,8 @@ export async function validateFile(
   return { isValid: true }
 }
 
-export async function uploadFile(
-  supabase: SupabaseClient,
-  file: File
-): Promise<string> {
-  const fileExt = file.name.split(".").pop()
-  const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
-  const filePath = `uploads/${fileName}`
-
-  const { error } = await supabase.storage
-    .from("chat-attachments")
-    .upload(filePath, file)
-
-  if (error) {
-    throw new Error(`Error uploading file: ${error.message}`)
-  }
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("chat-attachments").getPublicUrl(filePath)
-
-  return publicUrl
+export async function uploadFile(_supabase: unknown, _file: File): Promise<string> {
+  throw new Error("File uploads to storage are disabled")
 }
 
 export function createAttachment(file: File, url: string): Attachment {
@@ -87,7 +65,7 @@ export async function processFiles(
   chatId: string,
   userId: string
 ): Promise<Attachment[]> {
-  const supabase = isSupabaseEnabled ? createClient() : null
+  const supabase = null
   const attachments: Attachment[] = []
 
   for (const file of files) {
@@ -102,33 +80,42 @@ export async function processFiles(
       continue
     }
 
+    // Without storage, only inline image uploads are supported (per OpenAI image_url guidance)
+    if (!supabase && !file.type.startsWith("image/")) {
+      toast({
+        title: "Only images are supported for inline upload",
+        description: `${file.name} was skipped. Upload images (PNG/JPEG/GIF).`,
+        status: "info",
+      })
+      continue
+    }
+
     try {
-      const url = supabase
-        ? await uploadFile(supabase, file)
-        : URL.createObjectURL(file)
+      const url = file.type.startsWith("image/")
+        ? await fileToDataUrl(file)
+        : ""
 
-      if (supabase) {
-        const { error } = await supabase.from("chat_attachments").insert({
-          chat_id: chatId,
-          user_id: userId,
-          file_url: url,
-          file_name: file.name,
-          file_type: file.type,
-          file_size: file.size,
-        })
+      // No DB persistence
 
-        if (error) {
-          throw new Error(`Database insertion failed: ${error.message}`)
-        }
+      if (url) {
+        attachments.push(createAttachment(file, url))
       }
-
-      attachments.push(createAttachment(file, url))
     } catch (error) {
       console.error(`Error processing file ${file.name}:`, error)
     }
   }
 
   return attachments
+}
+
+async function fileToDataUrl(file: File): Promise<string> {
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () =>
+      reject(reader.error || new Error("Failed to read file as data URL"))
+    reader.readAsDataURL(file)
+  })
 }
 
 export class FileUploadLimitError extends Error {
@@ -139,34 +126,7 @@ export class FileUploadLimitError extends Error {
   }
 }
 
-export async function checkFileUploadLimit(userId: string) {
-  if (!isSupabaseEnabled) return 0
-
-  const supabase = createClient()
-
-  if (!supabase) {
-    toast({
-      title: "File upload is not supported in this deployment",
-      status: "info",
-    })
-    return 0
-  }
-
-  const now = new Date()
-  const startOfToday = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  )
-
-  const { count, error } = await supabase
-    .from("chat_attachments")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .gte("created_at", startOfToday.toISOString())
-
-  if (error) throw new Error(error.message)
-  if (count && count >= DAILY_FILE_UPLOAD_LIMIT) {
-    throw new FileUploadLimitError("Daily file upload limit reached.")
-  }
-
-  return count
+export async function checkFileUploadLimit(_userId: string) {
+  // No server-side tracking; enforce client-side guidance only
+  return 0
 }

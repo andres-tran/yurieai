@@ -70,7 +70,7 @@ export function MessageAssistant({
           : []
       ) ?? []
 
-  const isQuoteEnabled = !preferences.multiModelEnabled
+  const isQuoteEnabled = true
   const messageRef = useRef<HTMLDivElement>(null)
   const { selectionInfo, clearSelection } = useAssistantMessageSelection(
     messageRef,

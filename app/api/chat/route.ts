@@ -1,15 +1,7 @@
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { getAllModels } from "@/lib/models"
-import { getProviderForModel } from "@/lib/openproviders/provider-map"
-import type { ProviderWithoutOllama } from "@/lib/user-keys"
-import { Attachment } from "@ai-sdk/ui-utils"
 import { Message as MessageAISDK, streamText, ToolSet } from "ai"
-import {
-  incrementMessageCount,
-  logUserMessage,
-  storeAssistantMessage,
-  validateAndTrackUsage,
-} from "./api"
+import { validateAndTrackUsage } from "./api"
 import { createErrorResponse, extractErrorMessage } from "./utils"
 
 export const maxDuration = 60
@@ -19,10 +11,8 @@ type ChatRequest = {
   chatId: string
   userId: string
   model: string
-  isAuthenticated: boolean
   systemPrompt: string
   enableSearch: boolean
-  message_group_id?: string
 }
 
 export async function POST(req: Request) {
@@ -32,10 +22,8 @@ export async function POST(req: Request) {
       chatId,
       userId,
       model,
-      isAuthenticated,
       systemPrompt,
       enableSearch,
-      message_group_id,
     } = (await req.json()) as ChatRequest
 
     if (!messages || !chatId || !userId) {
@@ -45,31 +33,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const supabase = await validateAndTrackUsage({
-      userId,
-      model,
-      isAuthenticated,
-    })
-
-    // Increment message count for successful validation
-    if (supabase) {
-      await incrementMessageCount({ supabase, userId })
-    }
-
-    const userMessage = messages[messages.length - 1]
-
-    if (supabase && userMessage?.role === "user") {
-      await logUserMessage({
-        supabase,
-        userId,
-        chatId,
-        content: userMessage.content,
-        attachments: userMessage.experimental_attachments as Attachment[],
-        model,
-        isAuthenticated,
-        message_group_id,
-      })
-    }
+    await validateAndTrackUsage()
 
     const allModels = await getAllModels()
     const modelConfig = allModels.find((m) => m.id === model)
@@ -80,19 +44,13 @@ export async function POST(req: Request) {
 
     const effectiveSystemPrompt = systemPrompt || SYSTEM_PROMPT_DEFAULT
 
-    let apiKey: string | undefined
-    if (isAuthenticated && userId) {
-      const { getEffectiveApiKey } = await import("@/lib/user-keys")
-      const provider = getProviderForModel(model)
-      apiKey =
-        (await getEffectiveApiKey(userId, provider as ProviderWithoutOllama)) ||
-        undefined
-    }
+    const apiKey: string | undefined = undefined
 
     const result = streamText({
       model: modelConfig.apiSdk(apiKey, { enableSearch }),
       system: effectiveSystemPrompt,
       messages: messages,
+      temperature: 1,
       tools: {} as ToolSet,
       maxSteps: 10,
       onError: (err: unknown) => {
@@ -100,18 +58,7 @@ export async function POST(req: Request) {
         // Don't set streamError anymore - let the AI SDK handle it through the stream
       },
 
-      onFinish: async ({ response }) => {
-        if (supabase) {
-          await storeAssistantMessage({
-            supabase,
-            chatId,
-            messages:
-              response.messages as unknown as import("@/app/types/api.types").Message[],
-            message_group_id,
-            model,
-          })
-        }
-      },
+      onFinish: async () => {},
     })
 
     return result.toDataStreamResponse({

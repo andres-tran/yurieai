@@ -5,7 +5,6 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ChatsProvider } from "@/lib/chat-store/chats/provider"
-import { ChatSessionProvider } from "@/lib/chat-store/session/provider"
 import { ModelProvider } from "@/lib/model-store/provider"
 import { TanstackQueryProvider } from "@/lib/tanstack-query/tanstack-query-provider"
 import { UserPreferencesProvider } from "@/lib/user-preference-store/provider"
@@ -26,9 +25,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Zola",
+  title: "Yurie",
   description:
-    "Zola is the open-source interface for AI chat. Multi-model, BYOK-ready, and fully self-hostable. Use Claude, OpenAI, Gemini, local models, and more, all in one place.",
+    "Yurie is the open-source interface for AI chat. Multi-model and fully self-hostable. Use Claude, OpenAI, Gemini, local models, and more, all in one place.",
 }
 
 export default async function RootLayout({
@@ -57,11 +56,10 @@ export default async function RootLayout({
           <UserProvider initialUser={userProfile}>
             <ModelProvider>
               <ChatsProvider userId={userProfile?.id}>
-                <ChatSessionProvider>
-                  <UserPreferencesProvider
-                    userId={userProfile?.id}
-                    initialPreferences={userProfile?.preferences}
-                  >
+                <UserPreferencesProvider
+                  userId={userProfile?.id}
+                  initialPreferences={userProfile?.preferences}
+                >
                     <TooltipProvider
                       delayDuration={200}
                       skipDelayDuration={500}
@@ -79,7 +77,6 @@ export default async function RootLayout({
                       </ThemeProvider>
                     </TooltipProvider>
                   </UserPreferencesProvider>
-                </ChatSessionProvider>
               </ChatsProvider>
             </ModelProvider>
           </UserProvider>

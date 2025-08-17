@@ -5,7 +5,6 @@ export type UserPreferences = {
   promptSuggestions: boolean
   showToolInvocations: boolean
   showConversationPreviews: boolean
-  multiModelEnabled: boolean
   hiddenModels: string[]
 }
 
@@ -14,7 +13,6 @@ export const defaultPreferences: UserPreferences = {
   promptSuggestions: true,
   showToolInvocations: true,
   showConversationPreviews: true,
-  multiModelEnabled: false,
   hiddenModels: [],
 }
 
@@ -22,10 +20,9 @@ export const defaultPreferences: UserPreferences = {
 export function convertFromApiFormat(apiData: any): UserPreferences {
   return {
     layout: apiData.layout || "fullscreen",
-    promptSuggestions: apiData.prompt_suggestions ?? true,
+    promptSuggestions: true,
     showToolInvocations: apiData.show_tool_invocations ?? true,
     showConversationPreviews: apiData.show_conversation_previews ?? true,
-    multiModelEnabled: apiData.multi_model_enabled ?? false,
     hiddenModels: apiData.hidden_models || [],
   }
 }
@@ -33,14 +30,11 @@ export function convertFromApiFormat(apiData: any): UserPreferences {
 export function convertToApiFormat(preferences: Partial<UserPreferences>) {
   const apiData: any = {}
   if (preferences.layout !== undefined) apiData.layout = preferences.layout
-  if (preferences.promptSuggestions !== undefined)
-    apiData.prompt_suggestions = preferences.promptSuggestions
+  // promptSuggestions always enabled; don't persist
   if (preferences.showToolInvocations !== undefined)
     apiData.show_tool_invocations = preferences.showToolInvocations
   if (preferences.showConversationPreviews !== undefined)
     apiData.show_conversation_previews = preferences.showConversationPreviews
-  if (preferences.multiModelEnabled !== undefined)
-    apiData.multi_model_enabled = preferences.multiModelEnabled
   if (preferences.hiddenModels !== undefined)
     apiData.hidden_models = preferences.hiddenModels
   return apiData

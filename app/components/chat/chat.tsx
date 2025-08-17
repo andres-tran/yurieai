@@ -6,14 +6,13 @@ import { useModel } from "@/app/components/chat/use-model"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useMessages } from "@/lib/chat-store/messages/provider"
-import { useChatSession } from "@/lib/chat-store/session/provider"
+// Chat session routing removed
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { useUser } from "@/lib/user-store/provider"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import dynamic from "next/dynamic"
-import { redirect } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { useChatCore } from "./use-chat-core"
 import { useChatOperations } from "./use-chat-operations"
@@ -24,13 +23,10 @@ const FeedbackWidget = dynamic(
   { ssr: false }
 )
 
-const DialogAuth = dynamic(
-  () => import("./dialog-auth").then((mod) => mod.DialogAuth),
-  { ssr: false }
-)
+// Auth dialog removed
 
 export function Chat() {
-  const { chatId } = useChatSession()
+  const chatId = null
   const {
     createNewChat,
     getChatById,
@@ -39,10 +35,7 @@ export function Chat() {
     isLoading: isChatsLoading,
   } = useChats()
 
-  const currentChat = useMemo(
-    () => (chatId ? getChatById(chatId) : null),
-    [chatId, getChatById]
-  )
+  const currentChat = useMemo(() => null, [])
 
   const { messages: initialMessages, cacheAndAddMessage } = useMessages()
   const { user } = useUser()
@@ -70,10 +63,20 @@ export function Chat() {
 
   // State to pass between hooks
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
-  const isAuthenticated = useMemo(() => !!user?.id, [user?.id])
+  const isAuthenticated = false
   const systemPrompt = useMemo(
     () => user?.system_prompt || SYSTEM_PROMPT_DEFAULT,
     [user?.system_prompt]
+  )
+
+  const createNewChatCompat = useCallback(
+    (
+      userId: string,
+      title?: string,
+      model?: string,
+      systemPromptArg?: string
+    ) => createNewChat(userId, title, model, isAuthenticated, systemPromptArg),
+    [createNewChat, isAuthenticated]
   )
 
   // New state for quoted text
@@ -96,7 +99,7 @@ export function Chat() {
       messages: initialMessages,
       selectedModel,
       systemPrompt,
-      createNewChat,
+      createNewChat: createNewChatCompat,
       setHasDialogAuth,
       setMessages: () => {},
       setInput: () => {},
@@ -165,8 +168,7 @@ export function Chat() {
       files,
       onFileUpload: handleFileUpload,
       onFileRemove: handleFileRemove,
-      hasSuggestions:
-        preferences.promptSuggestions && !chatId && messages.length === 0,
+      hasSuggestions: messages.length === 0,
       onSelectModel: handleModelChange,
       selectedModel,
       isUserAuthenticated: isAuthenticated,
@@ -185,7 +187,6 @@ export function Chat() {
       files,
       handleFileUpload,
       handleFileRemove,
-      preferences.promptSuggestions,
       chatId,
       messages.length,
       handleModelChange,
@@ -201,19 +202,9 @@ export function Chat() {
 
   // Handle redirect for invalid chatId - only redirect if we're certain the chat doesn't exist
   // and we're not in a transient state during chat creation
-  if (
-    chatId &&
-    !isChatsLoading &&
-    !currentChat &&
-    !isSubmitting &&
-    status === "ready" &&
-    messages.length === 0 &&
-    !hasSentFirstMessageRef.current // Don't redirect if we've already sent a message in this session
-  ) {
-    return redirect("/")
-  }
+  // No chat routing; do not redirect
 
-  const showOnboarding = !chatId && messages.length === 0
+  const showOnboarding = messages.length === 0
 
   return (
     <div
@@ -221,7 +212,7 @@ export function Chat() {
         "@container/main relative flex h-full flex-col items-center justify-end md:justify-center"
       )}
     >
-      <DialogAuth open={hasDialogAuth} setOpen={setHasDialogAuth} />
+      {/* Auth removed; dialog disabled */}
 
       <AnimatePresence initial={false} mode="popLayout">
         {showOnboarding ? (
@@ -263,7 +254,7 @@ export function Chat() {
         <ChatInput {...chatInputProps} />
       </motion.div>
 
-      <FeedbackWidget authUserId={user?.id} />
+      {/* Feedback disabled without backend */}
     </div>
   )
 }

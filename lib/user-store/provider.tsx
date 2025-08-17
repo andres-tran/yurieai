@@ -30,30 +30,10 @@ export function UserProvider({
   const [user, setUser] = useState<UserProfile | null>(initialUser)
   const [isLoading, setIsLoading] = useState(false)
 
-  const refreshUser = async () => {
-    if (!user?.id) return
-
-    setIsLoading(true)
-    try {
-      const updatedUser = await fetchUserProfile(user.id)
-      if (updatedUser) setUser(updatedUser)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const refreshUser = async () => {}
 
   const updateUser = async (updates: Partial<UserProfile>) => {
-    if (!user?.id) return
-
-    setIsLoading(true)
-    try {
-      const success = await updateUserProfile(user.id, updates)
-      if (success) {
-        setUser((prev) => (prev ? { ...prev, ...updates } : null))
-      }
-    } finally {
-      setIsLoading(false)
-    }
+    setUser((prev) => (prev ? { ...prev, ...updates } : prev))
   }
 
   const signOut = async () => {
@@ -67,17 +47,7 @@ export function UserProvider({
   }
 
   // Set up realtime subscription for user data changes
-  useEffect(() => {
-    if (!user?.id) return
-
-    const unsubscribe = subscribeToUserUpdates(user.id, (newData) => {
-      setUser((prev) => (prev ? { ...prev, ...newData } : null))
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [user?.id])
+  useEffect(() => {}, [user?.id])
 
   return (
     <UserContext.Provider

@@ -2,7 +2,7 @@ import { createChatInDb } from "./api"
 
 export async function POST(request: Request) {
   try {
-    const { userId, title, model, isAuthenticated, projectId } =
+    const { userId, title, model, projectId } =
       await request.json()
 
     if (!userId) {
@@ -15,16 +15,8 @@ export async function POST(request: Request) {
       userId,
       title,
       model,
-      isAuthenticated,
       projectId,
     })
-
-    if (!chat) {
-      return new Response(
-        JSON.stringify({ error: "Supabase not available in this deployment." }),
-        { status: 200 }
-      )
-    }
 
     return new Response(JSON.stringify({ chat }), { status: 200 })
   } catch (err: unknown) {

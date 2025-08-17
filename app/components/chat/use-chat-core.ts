@@ -58,7 +58,7 @@ export function useChatCore({
   // Refs and derived state
   const hasSentFirstMessageRef = useRef(false)
   const prevChatIdRef = useRef<string | null>(chatId)
-  const isAuthenticated = useMemo(() => !!user?.id, [user?.id])
+  const isAuthenticated = false
   const systemPrompt = useMemo(
     () => user?.system_prompt || SYSTEM_PROMPT_DEFAULT,
     [user?.system_prompt]
@@ -112,14 +112,16 @@ export function useChatCore({
   }, [prompt, setInput])
 
   // Reset messages when navigating from a chat to home
-  if (
-    prevChatIdRef.current !== null &&
-    chatId === null &&
-    messages.length > 0
-  ) {
-    setMessages([])
-  }
-  prevChatIdRef.current = chatId
+  useEffect(() => {
+    if (
+      prevChatIdRef.current !== null &&
+      chatId === null &&
+      messages.length > 0
+    ) {
+      setMessages([])
+    }
+    prevChatIdRef.current = chatId
+  }, [chatId, messages.length, setMessages])
 
   // Submit action
   const submit = useCallback(async () => {
@@ -192,7 +194,6 @@ export function useChatCore({
           chatId: currentChatId,
           userId: uid,
           model: selectedModel,
-          isAuthenticated,
           systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
           enableSearch,
         },
@@ -279,7 +280,6 @@ export function useChatCore({
             chatId: currentChatId,
             userId: uid,
             model: selectedModel,
-            isAuthenticated,
             systemPrompt: SYSTEM_PROMPT_DEFAULT,
           },
         }
@@ -323,7 +323,6 @@ export function useChatCore({
         chatId,
         userId: uid,
         model: selectedModel,
-        isAuthenticated,
         systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
       },
     }

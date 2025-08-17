@@ -132,8 +132,6 @@ export function ProjectView({ projectId }: ProjectViewProps) {
           if (!newChat) return null
 
           setCurrentChatId(newChat.id)
-          // Redirect to the chat page as expected
-          window.history.pushState(null, "", `/c/${newChat.id}`)
           return newChat.id
         } catch (err: unknown) {
           let errorMessage = "Something went wrong."

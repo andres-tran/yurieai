@@ -1,7 +1,6 @@
 "use client"
 
-import { usePathname } from "next/navigation"
-import { createContext, useContext, useMemo } from "react"
+import { createContext, useContext } from "react"
 
 const ChatSessionContext = createContext<{ chatId: string | null }>({
   chatId: null,
@@ -14,14 +13,8 @@ export function ChatSessionProvider({
 }: {
   children: React.ReactNode
 }) {
-  const pathname = usePathname()
-  const chatId = useMemo(() => {
-    if (pathname?.startsWith("/c/")) return pathname.split("/c/")[1]
-    return null
-  }, [pathname])
-
   return (
-    <ChatSessionContext.Provider value={{ chatId }}>
+    <ChatSessionContext.Provider value={{ chatId: null }}>
       {children}
     </ChatSessionContext.Provider>
   )

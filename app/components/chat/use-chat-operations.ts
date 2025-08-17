@@ -1,7 +1,5 @@
 import { toast } from "@/components/ui/toast"
-import { checkRateLimits } from "@/lib/api"
 import type { Chats } from "@/lib/chat-store/types"
-import { REMAINING_QUERY_ALERT_THRESHOLD } from "@/lib/config"
 import { Message } from "@ai-sdk/react"
 import { useCallback } from "react"
 
@@ -15,7 +13,6 @@ type UseChatOperationsProps = {
     userId: string,
     title?: string,
     model?: string,
-    isAuthenticated?: boolean,
     systemPrompt?: string
   ) => Promise<Chats | undefined>
   setHasDialogAuth: (value: boolean) => void
@@ -36,38 +33,8 @@ export function useChatOperations({
   setMessages,
 }: UseChatOperationsProps) {
   // Chat utilities
-  const checkLimitsAndNotify = async (uid: string): Promise<boolean> => {
-    try {
-      const rateData = await checkRateLimits(uid, isAuthenticated)
-
-      if (rateData.remaining === 0 && !isAuthenticated) {
-        setHasDialogAuth(true)
-        return false
-      }
-
-      if (rateData.remaining === REMAINING_QUERY_ALERT_THRESHOLD) {
-        toast({
-          title: `Only ${rateData.remaining} quer${
-            rateData.remaining === 1 ? "y" : "ies"
-          } remaining today.`,
-          status: "info",
-        })
-      }
-
-      if (rateData.remainingPro === REMAINING_QUERY_ALERT_THRESHOLD) {
-        toast({
-          title: `Only ${rateData.remainingPro} pro quer${
-            rateData.remainingPro === 1 ? "y" : "ies"
-          } remaining today.`,
-          status: "info",
-        })
-      }
-
-      return true
-    } catch (err) {
-      console.error("Rate limit check failed:", err)
-      return false
-    }
+  const checkLimitsAndNotify = async (_uid: string): Promise<boolean> => {
+    return true
   }
 
   const ensureChatExists = async (userId: string, input: string) => {
@@ -78,20 +45,10 @@ export function useChatOperations({
 
     if (messages.length === 0) {
       try {
-        const newChat = await createNewChat(
-          userId,
-          input,
-          selectedModel,
-          isAuthenticated,
-          systemPrompt
-        )
+        const newChat = await createNewChat(userId, input, selectedModel, systemPrompt)
 
         if (!newChat) return null
-        if (isAuthenticated) {
-          window.history.pushState(null, "", `/c/${newChat.id}`)
-        } else {
-          localStorage.setItem("guestChatId", newChat.id)
-        }
+        localStorage.setItem("guestChatId", newChat.id)
 
         return newChat.id
       } catch (err: unknown) {

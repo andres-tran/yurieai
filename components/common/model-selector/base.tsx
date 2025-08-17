@@ -1,6 +1,5 @@
 "use client"
 
-import { PopoverContentAuth } from "@/app/components/chat-input/popover-content-auth"
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { useKeyShortcut } from "@/app/hooks/use-key-shortcut"
 import { Button } from "@/components/ui/button"
@@ -37,7 +36,7 @@ import {
 } from "@phosphor-icons/react"
 import { useRef, useState } from "react"
 import { ProModelDialog } from "./pro-dialog"
-import { SubMenu } from "./sub-menu"
+ 
 
 type ModelSelectorProps = {
   selectedModelId: string
@@ -61,7 +60,6 @@ export function ModelSelector({
   )
   const isMobile = useBreakpoint(768)
 
-  const [hoveredModel, setHoveredModel] = useState<string | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isProDialogOpen, setIsProDialogOpen] = useState(false)
@@ -90,7 +88,7 @@ export function ModelSelector({
       <div
         key={model.id}
         className={cn(
-          "flex w-full items-center justify-between px-3 py-2",
+          "flex w-full items-center justify-between px-3 py-1.5",
           selectedModelId === model.id && "bg-accent"
         )}
         onClick={() => {
@@ -108,8 +106,8 @@ export function ModelSelector({
           }
         }}
       >
-        <div className="flex items-center gap-3">
-          {provider?.icon && <provider.icon className="size-5" />}
+        <div className="flex items-center gap-2.5">
+          {provider?.icon && <provider.icon className="size-4" />}
           <div className="flex flex-col gap-0">
             <span className="text-sm">{model.name}</span>
           </div>
@@ -124,11 +122,8 @@ export function ModelSelector({
     )
   }
 
-  // Get the hovered model data
-  const hoveredModelData = models.find((model) => model.id === hoveredModel)
-
   const filteredModels = filterAndSortModels(
-    models,
+    models.filter((m) => m.providerId === "openai"),
     favoriteModels || [],
     searchQuery,
     isModelHidden
@@ -137,7 +132,7 @@ export function ModelSelector({
   const trigger = (
     <Button
       variant="outline"
-      className={cn("dark:bg-secondary justify-between", className)}
+      className={cn("dark:bg-secondary justify-between px-4 py-1.5", className)}
       disabled={isLoadingModels}
     >
       <div className="flex items-center gap-2">
@@ -154,36 +149,7 @@ export function ModelSelector({
     setSearchQuery(e.target.value)
   }
 
-  // If user is not authenticated, show the auth popover
-  if (!isUserAuthenticated) {
-    return (
-      <Popover>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <PopoverTrigger asChild>
-              <Button
-                size="sm"
-                variant="secondary"
-                className={cn(
-                  "border-border dark:bg-secondary text-accent-foreground h-9 w-auto border bg-transparent",
-                  className
-                )}
-                type="button"
-              >
-                {currentProvider?.icon && (
-                  <currentProvider.icon className="size-5" />
-                )}
-                {currentModel?.name}
-                <CaretDownIcon className="size-4" />
-              </Button>
-            </PopoverTrigger>
-          </TooltipTrigger>
-          <TooltipContent>Select a model</TooltipContent>
-        </Tooltip>
-        <PopoverContentAuth />
-      </Popover>
-    )
-  }
+  // Auth removed: always allow model selection
 
   if (isMobile) {
     return (
@@ -226,14 +192,7 @@ export function ModelSelector({
                   <p className="text-muted-foreground mb-2 text-sm">
                     No results found.
                   </p>
-                  <a
-                    href="https://github.com/ibelick/zola/issues/new?title=Model%20Request%3A%20"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground text-sm underline"
-                  >
-                    Request a new model
-                  </a>
+                  <p className="text-muted-foreground text-sm">Request a new model</p>
                 </div>
               )}
             </div>
@@ -256,10 +215,7 @@ export function ModelSelector({
           onOpenChange={(open) => {
             setIsDropdownOpen(open)
             if (!open) {
-              setHoveredModel(null)
               setSearchQuery("")
-            } else {
-              if (selectedModelId) setHoveredModel(selectedModelId)
             }
           }}
         >
@@ -268,28 +224,14 @@ export function ModelSelector({
           </TooltipTrigger>
           <TooltipContent>Switch model ⌘⇧P</TooltipContent>
           <DropdownMenuContent
-            className="flex h-[320px] w-[300px] flex-col space-y-0.5 overflow-visible p-0"
+            className="flex h-[200px] w-[220px] flex-col space-y-1 overflow-visible px-3 py-2"
             align="start"
             sideOffset={4}
             forceMount
             side="top"
           >
-            <div className="bg-background sticky top-0 z-10 rounded-t-md border-b px-0 pt-0 pb-0">
-              <div className="relative">
-                <MagnifyingGlassIcon className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-                <Input
-                  ref={searchInputRef}
-                  placeholder="Search models..."
-                  className="dark:bg-popover rounded-b-none border border-none pl-8 shadow-none focus-visible:ring-0"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  onClick={(e) => e.stopPropagation()}
-                  onFocus={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => e.stopPropagation()}
-                />
-              </div>
-            </div>
-            <div className="flex h-full flex-col space-y-0 overflow-y-auto px-1 pt-0 pb-0">
+            
+            <div className="flex h-full flex-col space-y-1.5 overflow-y-auto px-2 pt-0 pb-0">
               {isLoadingModels ? (
                 <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                   <p className="text-muted-foreground mb-2 text-sm">
@@ -307,7 +249,7 @@ export function ModelSelector({
                     <DropdownMenuItem
                       key={model.id}
                       className={cn(
-                        "flex w-full items-center justify-between px-3 py-2",
+                        "flex w-full items-center justify-between px-3 py-1.5",
                         selectedModelId === model.id && "bg-accent"
                       )}
                       onSelect={() => {
@@ -320,19 +262,9 @@ export function ModelSelector({
                         setSelectedModelId(model.id)
                         setIsDropdownOpen(false)
                       }}
-                      onFocus={() => {
-                        if (isDropdownOpen) {
-                          setHoveredModel(model.id)
-                        }
-                      }}
-                      onMouseEnter={() => {
-                        if (isDropdownOpen) {
-                          setHoveredModel(model.id)
-                        }
-                      }}
                     >
-                      <div className="flex items-center gap-3">
-                        {provider?.icon && <provider.icon className="size-5" />}
+                      <div className="flex items-center gap-2">
+                        {provider?.icon && <provider.icon className="size-4" />}
                         <div className="flex flex-col gap-0">
                           <span className="text-sm">{model.name}</span>
                         </div>
@@ -350,24 +282,12 @@ export function ModelSelector({
                   <p className="text-muted-foreground mb-1 text-sm">
                     No results found.
                   </p>
-                  <a
-                    href="https://github.com/ibelick/zola/issues/new?title=Model%20Request%3A%20"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground text-sm underline"
-                  >
-                    Request a new model
-                  </a>
+                  <p className="text-muted-foreground text-sm">Request a new model</p>
                 </div>
               )}
             </div>
 
-            {/* Submenu positioned absolutely */}
-            {hoveredModelData && (
-              <div className="absolute top-0 left-[calc(100%+8px)]">
-                <SubMenu hoveredModelData={hoveredModelData} />
-              </div>
-            )}
+            
           </DropdownMenuContent>
         </DropdownMenu>
       </Tooltip>

@@ -23,10 +23,8 @@ const LAYOUT_STORAGE_KEY = "preferred-layout"
 interface UserPreferencesContextType {
   preferences: UserPreferences
   setLayout: (layout: LayoutType) => void
-  setPromptSuggestions: (enabled: boolean) => void
   setShowToolInvocations: (enabled: boolean) => void
   setShowConversationPreviews: (enabled: boolean) => void
-  setMultiModelEnabled: (enabled: boolean) => void
   toggleModelVisibility: (modelId: string) => void
   isModelHidden: (modelId: string) => boolean
   isLoading: boolean
@@ -194,9 +192,7 @@ export function UserPreferencesProvider({
     }
   }
 
-  const setPromptSuggestions = (enabled: boolean) => {
-    updatePreferences({ promptSuggestions: enabled })
-  }
+  
 
   const setShowToolInvocations = (enabled: boolean) => {
     updatePreferences({ showToolInvocations: enabled })
@@ -206,9 +202,7 @@ export function UserPreferencesProvider({
     updatePreferences({ showConversationPreviews: enabled })
   }
 
-  const setMultiModelEnabled = (enabled: boolean) => {
-    updatePreferences({ multiModelEnabled: enabled })
-  }
+  
 
   const toggleModelVisibility = (modelId: string) => {
     const currentHidden = preferences.hiddenModels || []
@@ -229,10 +223,8 @@ export function UserPreferencesProvider({
       value={{
         preferences,
         setLayout,
-        setPromptSuggestions,
         setShowToolInvocations,
         setShowConversationPreviews,
-        setMultiModelEnabled,
         toggleModelVisibility,
         isModelHidden,
         isLoading,

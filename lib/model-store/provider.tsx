@@ -11,14 +11,8 @@ import {
 } from "react"
 
 type UserKeyStatus = {
-  openrouter: boolean
   openai: boolean
-  mistral: boolean
-  google: boolean
-  perplexity: boolean
-  xai: boolean
-  anthropic: boolean
-  [key: string]: boolean // Allow for additional providers
+  [key: string]: boolean
 }
 
 type ModelContextType = {
@@ -38,13 +32,7 @@ const ModelContext = createContext<ModelContextType | undefined>(undefined)
 export function ModelProvider({ children }: { children: React.ReactNode }) {
   const [models, setModels] = useState<ModelConfig[]>([])
   const [userKeyStatus, setUserKeyStatus] = useState<UserKeyStatus>({
-    openrouter: false,
     openai: false,
-    mistral: false,
-    google: false,
-    perplexity: false,
-    xai: false,
-    anthropic: false,
   })
   const [favoriteModels, setFavoriteModels] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -62,25 +50,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const fetchUserKeyStatus = useCallback(async () => {
-    try {
-      const response = await fetchClient("/api/user-key-status")
-      if (response.ok) {
-        const data = await response.json()
-        setUserKeyStatus(data)
-      }
-    } catch (error) {
-      console.error("Failed to fetch user key status:", error)
-      // Set default values on error
-      setUserKeyStatus({
-        openrouter: false,
-        openai: false,
-        mistral: false,
-        google: false,
-        perplexity: false,
-        xai: false,
-        anthropic: false,
-      })
-    }
+    setUserKeyStatus({ openai: false })
   }, [])
 
   const fetchFavoriteModels = useCallback(async () => {

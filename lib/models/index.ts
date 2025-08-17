@@ -1,69 +1,33 @@
 import { FREE_MODELS_IDS } from "../config"
-import { claudeModels } from "./data/claude"
-import { deepseekModels } from "./data/deepseek"
-import { geminiModels } from "./data/gemini"
-import { grokModels } from "./data/grok"
-import { mistralModels } from "./data/mistral"
-import { getOllamaModels, ollamaModels } from "./data/ollama"
 import { openaiModels } from "./data/openai"
-import { openrouterModels } from "./data/openrouter"
-import { perplexityModels } from "./data/perplexity"
 import { ModelConfig } from "./types"
 
-// Static models (always available)
-const STATIC_MODELS: ModelConfig[] = [
-  ...openaiModels,
-  ...mistralModels,
-  ...deepseekModels,
-  ...claudeModels,
-  ...grokModels,
-  ...perplexityModels,
-  ...geminiModels,
-  ...ollamaModels, // Static fallback Ollama models
-  ...openrouterModels,
-]
+// Static models (always available) - restricted to OpenAI only
+const STATIC_MODELS: ModelConfig[] = [...openaiModels]
 
 // Dynamic models cache
 let dynamicModelsCache: ModelConfig[] | null = null
 let lastFetchTime = 0
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
-// // Function to get all models including dynamically detected ones
+// Function to get all models (OpenAI only)
 export async function getAllModels(): Promise<ModelConfig[]> {
   const now = Date.now()
 
-  // Use cache if it's still valid
   if (dynamicModelsCache && now - lastFetchTime < CACHE_DURATION) {
     return dynamicModelsCache
   }
 
-  try {
-    // Get dynamically detected Ollama models (includes enabled check internally)
-    const detectedOllamaModels = await getOllamaModels()
-
-    // Combine static models (excluding static Ollama models) with detected ones
-    const staticModelsWithoutOllama = STATIC_MODELS.filter(
-      (model) => model.providerId !== "ollama"
-    )
-
-    dynamicModelsCache = [...staticModelsWithoutOllama, ...detectedOllamaModels]
-
-    lastFetchTime = now
-    return dynamicModelsCache
-  } catch (error) {
-    console.warn("Failed to load dynamic models, using static models:", error)
-    return STATIC_MODELS
-  }
+  dynamicModelsCache = STATIC_MODELS
+  lastFetchTime = now
+  return dynamicModelsCache
 }
 
 export async function getModelsWithAccessFlags(): Promise<ModelConfig[]> {
   const models = await getAllModels()
 
   const freeModels = models
-    .filter(
-      (model) =>
-        FREE_MODELS_IDS.includes(model.id) || model.providerId === "ollama"
-    )
+    .filter((model) => FREE_MODELS_IDS.includes(model.id))
     .map((model) => ({
       ...model,
       accessible: true,

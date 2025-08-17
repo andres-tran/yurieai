@@ -3,7 +3,6 @@ import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { GlobeIcon } from "@phosphor-icons/react"
 import React from "react"
-import { PopoverContentAuth } from "./popover-content-auth"
 
 type ButtonSearchProps = {
   isSelected?: boolean
@@ -19,23 +18,6 @@ export function ButtonSearch({
   const handleClick = () => {
     const newState = !isSelected
     onToggle?.(newState)
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="secondary"
-            className="border-border dark:bg-secondary rounded-full border bg-transparent"
-          >
-            <GlobeIcon className="size-5" />
-            Search
-          </Button>
-        </PopoverTrigger>
-        <PopoverContentAuth />
-      </Popover>
-    )
   }
 
   return (

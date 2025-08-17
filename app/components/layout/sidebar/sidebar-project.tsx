@@ -21,9 +21,14 @@ export function SidebarProject() {
     queryFn: async () => {
       const response = await fetch("/api/projects")
       if (!response.ok) {
-        throw new Error("Failed to fetch projects")
+        return []
       }
-      return response.json()
+      try {
+        const json = await response.json()
+        return Array.isArray(json) ? json : []
+      } catch {
+        return []
+      }
     },
   })
 
@@ -42,7 +47,7 @@ export function SidebarProject() {
 
       {isLoading ? null : (
         <div className="space-y-1">
-          {projects.map((project) => (
+          {(projects || []).map((project) => (
             <SidebarProjectItem key={project.id} project={project} />
           ))}
         </div>

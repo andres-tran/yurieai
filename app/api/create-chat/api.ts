@@ -1,11 +1,9 @@
-import { validateUserIdentity } from "@/lib/server/api"
-import { checkUsageByModel } from "@/lib/usage"
+// Usage checks removed
 
 type CreateChatInput = {
   userId: string
   title?: string
   model: string
-  isAuthenticated: boolean
   projectId?: string
 }
 
@@ -13,22 +11,9 @@ export async function createChatInDb({
   userId,
   title,
   model,
-  isAuthenticated,
   projectId,
 }: CreateChatInput) {
-  const supabase = await validateUserIdentity(userId, isAuthenticated)
-  if (!supabase) {
-    return {
-      id: crypto.randomUUID(),
-      user_id: userId,
-      title,
-      model,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  }
-
-  await checkUsageByModel(supabase, userId, model, isAuthenticated)
+  // no-op usage check
 
   const insertData: {
     user_id: string
@@ -45,16 +30,14 @@ export async function createChatInDb({
     insertData.project_id = projectId
   }
 
-  const { data, error } = await supabase
-    .from("chats")
-    .insert(insertData)
-    .select("*")
-    .single()
-
-  if (error || !data) {
-    console.error("Error creating chat:", error)
-    return null
+  return {
+    id: crypto.randomUUID(),
+    user_id: userId,
+    title: insertData.title,
+    model,
+    project_id: insertData.project_id || null,
+    public: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   }
-
-  return data
 }

@@ -1,7 +1,6 @@
 "use client"
 
 import { useBreakpoint } from "@/app/hooks/use-breakpoint"
-import XIcon from "@/components/icons/x"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -24,10 +23,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useChatSession } from "@/lib/chat-store/session/provider"
 import { APP_DOMAIN } from "@/lib/config"
-import { createClient } from "@/lib/supabase/client"
-import { isSupabaseEnabled } from "@/lib/supabase/config"
+// Backend removed
 import { Check, Copy, Globe, Spinner } from "@phosphor-icons/react"
 import type React from "react"
 import { useState } from "react"
@@ -35,17 +32,11 @@ import { useState } from "react"
 export function DialogPublish() {
   const [openDialog, setOpenDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const { chatId } = useChatSession()
+  const chatId = null
   const isMobile = useBreakpoint(768)
   const [copied, setCopied] = useState(false)
 
-  if (!isSupabaseEnabled) {
-    return null
-  }
-
-  if (!chatId) {
-    return null
-  }
+  return null
 
   const publicLink = `${APP_DOMAIN}/share/${chatId}`
 
@@ -55,38 +46,9 @@ export function DialogPublish() {
     window.open(publicLink, "_blank")
   }
 
-  const shareOnX = () => {
-    setOpenDialog(false)
+  // Removed social media share action
 
-    const X_TEXT = `Check out this public page I created with Zola! ${publicLink}`
-    window.open(`https://x.com/intent/tweet?text=${X_TEXT}`, "_blank")
-  }
-
-  const handlePublish = async () => {
-    setIsLoading(true)
-
-    const supabase = createClient()
-
-    if (!supabase) {
-      throw new Error("Supabase is not configured")
-    }
-
-    const { data, error } = await supabase
-      .from("chats")
-      .update({ public: true })
-      .eq("id", chatId)
-      .select()
-      .single()
-
-    if (error) {
-      console.error(error)
-    }
-
-    if (data) {
-      setIsLoading(false)
-      setOpenDialog(true)
-    }
-  }
+  const handlePublish = async () => {}
 
   const copyLink = () => {
     navigator.clipboard.writeText(publicLink)
@@ -148,9 +110,6 @@ export function DialogPublish() {
       <div className="flex gap-2">
         <Button variant="outline" onClick={openPage} className="flex-1">
           View Page
-        </Button>
-        <Button onClick={shareOnX} className="flex-1">
-          Share on <XIcon className="text-primary-foreground size-4" />
         </Button>
       </div>
     </>
