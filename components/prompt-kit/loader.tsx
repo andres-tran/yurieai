@@ -23,8 +23,8 @@ const TRANSITION = {
   duration: ANIMATION_DURATION,
   ease: "easeInOut",
   repeat: Number.POSITIVE_INFINITY,
-  repeatType: "loop" as const,
-}
+  repeatType: "loop",
+} as const
 
 export function Loader() {
   return (
