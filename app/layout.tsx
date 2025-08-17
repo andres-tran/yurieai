@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   ),
   title: "Yurie",
   description:
-    "Yurie is the open-source interface for AI chat. Multi-model and fully self-hostable. Use Claude, OpenAI, Gemini, local models, and more, all in one place.",
+    "Yurie is the open-source interface for AI chat using OpenAI models only. Fully self-hostable.",
 }
 
 export default async function RootLayout({
