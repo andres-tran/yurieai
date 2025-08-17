@@ -4,8 +4,6 @@
 
 **Yurie** is the open-source chat interface for all your models.
 
-![yurie cover](./public/cover_yurie.jpg)
-
 ## Features
 
 - OpenAI models only
