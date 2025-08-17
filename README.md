@@ -2,8 +2,6 @@
 
 [yurie.ai](https://yurie.ai)
 
-**Yurie** is the open-source chat interface for all your models.
-
 ## Features
 
 - OpenAI models only

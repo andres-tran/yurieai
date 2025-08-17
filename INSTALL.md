@@ -2,8 +2,6 @@
 
 Yurie is a free, open-source AI chat app using OpenAI models. This guide covers local development and production deployment.
 
-![Yurie screenshot](./public/cover_yurie.jpg)
-
 ## Prerequisites
 
 - Node.js 18.x or later

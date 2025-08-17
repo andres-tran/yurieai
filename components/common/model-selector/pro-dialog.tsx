@@ -40,15 +40,7 @@ export function ProModelDialog({
 
   const renderContent = () => (
     <div className="flex max-h-[70vh] flex-col" key={currentModel}>
-      <div className="relative">
-        <Image
-          src="/banner_ocean.jpg"
-          alt={`calm paint generate by ${APP_NAME}`}
-          width={400}
-          height={128}
-          className="h-32 w-full object-cover"
-        />
-      </div>
+      <div className="h-32 w-full bg-muted" />
 
       <div className="px-6 pt-4 text-center text-lg leading-tight font-medium">
         This model is locked
