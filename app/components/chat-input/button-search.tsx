@@ -24,7 +24,7 @@ export function ButtonSearch({
       className={cn(
         "border-border dark:bg-secondary rounded-full border bg-transparent transition-all duration-150 has-[>svg]:px-1.75 md:has-[>svg]:px-3",
         isSelected &&
-          "border-[#0091FF]/20 bg-[#E5F3FE] text-[#0091FF] hover:bg-[#E5F3FE] hover:text-[#0091FF]"
+          "border-[#98a9f4]/20 bg-[#E5F3FE] text-[#98a9f4] hover:bg-[#E5F3FE] hover:text-[#98a9f4]"
       )}
       onClick={handleClick}
     >

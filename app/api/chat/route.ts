@@ -1,8 +1,9 @@
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { getAllModels } from "@/lib/models"
-import { Message as MessageAISDK, streamText, ToolSet } from "ai"
+import { Message as MessageAISDK, streamText } from "ai"
 // usage tracking removed
 import { createErrorResponse, extractErrorMessage } from "./utils"
+import { openai } from "@ai-sdk/openai"
 
 export const maxDuration = 60
 
@@ -54,7 +55,18 @@ export async function POST(req: Request) {
       system: effectiveSystemPrompt,
       messages: messages,
       temperature: 1,
-      tools: {} as ToolSet,
+      tools: enableSearch
+        ? {
+            web_search_preview: openai.tools.webSearchPreview({
+              searchContextSize: "high",
+              userLocation: {
+                type: "approximate",
+                country: "US",
+                timezone: "America/Chicago",
+              },
+            }),
+          }
+        : undefined,
       maxSteps: 10,
       onError: (err: unknown) => {
         console.error("Streaming error occurred:", err)
