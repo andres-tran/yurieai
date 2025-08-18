@@ -4,14 +4,7 @@ import { toast } from "@/components/ui/toast"
 // Chat session removed
 import type { Message as MessageAISDK } from "ai"
 import { createContext, useContext, useEffect, useState } from "react"
-import { writeToIndexedDB } from "../persist"
-import {
-  cacheMessages,
-  clearMessagesForChat,
-  getCachedMessages,
-  getMessagesFromDb,
-  setMessages as saveMessages,
-} from "./api"
+ 
 
 interface MessagesContextType {
   messages: MessageAISDK[]

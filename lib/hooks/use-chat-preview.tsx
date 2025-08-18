@@ -1,4 +1,4 @@
-import { getMessages, setMessages } from "@/lib/chat-store/store"
+import { getMessages, setMessages as setMessagesStore } from "@/lib/chat-store/store"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 interface ChatMessage {
@@ -82,7 +82,7 @@ export function useChatPreview(): UseChatPreviewReturn {
             !controller.signal.aborted
           ) {
             // Cache the fresh messages
-            await setMessages(chatId, fresh)
+            await setMessagesStore(chatId, fresh)
 
             const freshMessages = fresh
               .slice(-5) // Get last 5 messages
