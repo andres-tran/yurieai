@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button"
-import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { GlobeIcon } from "@phosphor-icons/react"
 import React from "react"
@@ -20,15 +19,19 @@ export function ButtonSearch({
 
   return (
     <Button
+      size="sm"
       variant="secondary"
       className={cn(
-        "border-border dark:bg-secondary rounded-full border bg-transparent transition-all duration-150 has-[>svg]:px-1.75 md:has-[>svg]:px-3",
+        // Mobile: fixed circular icon button like file upload
+        "border-border dark:bg-secondary size-9 rounded-full border bg-transparent transition-all duration-150",
+        // Desktop: allow width for label
+        "md:w-auto md:px-3",
         isSelected &&
           "border-[#98a9f4]/20 bg-[#E5F3FE] text-[#98a9f4] hover:bg-[#E5F3FE] hover:text-[#98a9f4]"
       )}
       onClick={handleClick}
     >
-      <GlobeIcon className="size-5" />
+      <GlobeIcon className="size-4" />
       <span className="hidden md:block">Search</span>
     </Button>
   )
