@@ -1,6 +1,6 @@
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
-import { getOrCreateGuestUserId } from "@/lib/api"
+// Auth removed
 import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
@@ -139,11 +139,7 @@ export function useChatCore({
   const submit = useCallback(async () => {
     setIsSubmitting(true)
 
-    const uid = await getOrCreateGuestUserId(user)
-    if (!uid) {
-      setIsSubmitting(false)
-      return
-    }
+    // No user identity required
 
     const optimisticId = `optimistic-${Date.now().toString()}`
     const optimisticAttachments =
@@ -165,11 +161,14 @@ export function useChatCore({
     setFiles([])
 
     try {
-      const currentChatId = chatId ?? (localStorage.getItem("guestChatId") || (() => {
-        const newId = crypto.randomUUID()
-        localStorage.setItem("guestChatId", newId)
-        return newId
-      })())
+      const currentChatId =
+        chatId ||
+        (localStorage.getItem("guestChatId") ||
+          (() => {
+            const newId = crypto.randomUUID()
+            localStorage.setItem("guestChatId", newId)
+            return newId
+          })())
 
       if (input.length > MESSAGE_MAX_LENGTH) {
         toast({
@@ -183,7 +182,7 @@ export function useChatCore({
 
       let attachments: Attachment[] | null = []
       if (submittedFiles.length > 0) {
-        attachments = await handleFileUploads(uid, currentChatId)
+        attachments = await handleFileUploads("local", currentChatId)
         if (attachments === null) {
           setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
           cleanupOptimisticAttachments(
@@ -196,7 +195,6 @@ export function useChatCore({
       const options = {
         body: {
           chatId: currentChatId,
-          userId: uid,
           model: selectedModel,
           systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
           enableSearch,
@@ -260,18 +258,14 @@ export function useChatCore({
       setMessages((prev) => [...prev, optimisticMessage])
 
       try {
-        const uid = await getOrCreateGuestUserId(user)
-
-        if (!uid) {
-          setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-          return
-        }
-
-        const currentChatId = chatId ?? (localStorage.getItem("guestChatId") || (() => {
-          const newId = crypto.randomUUID()
-          localStorage.setItem("guestChatId", newId)
-          return newId
-        })())
+        const currentChatId =
+          chatId ||
+          (localStorage.getItem("guestChatId") ||
+            (() => {
+              const newId = crypto.randomUUID()
+              localStorage.setItem("guestChatId", newId)
+              return newId
+            })())
 
         if (!currentChatId) {
           setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
@@ -281,7 +275,6 @@ export function useChatCore({
         const options = {
           body: {
             chatId: currentChatId,
-            userId: uid,
             model: selectedModel,
             systemPrompt: SYSTEM_PROMPT_DEFAULT,
           },
@@ -315,13 +308,8 @@ export function useChatCore({
 
   // Handle reload
   const handleReload = useCallback(async () => {
-    const uid = await getOrCreateGuestUserId(user)
-    if (!uid) {
-      return
-    }
-
     const currentChatId =
-      chatId ??
+      chatId ||
       (localStorage.getItem("guestChatId") ||
         (() => {
           const newId = crypto.randomUUID()
@@ -336,7 +324,6 @@ export function useChatCore({
     const options = {
       body: {
         chatId: currentChatId,
-        userId: uid,
         model: selectedModel,
         systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
         enableSearch,

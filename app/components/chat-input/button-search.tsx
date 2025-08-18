@@ -7,13 +7,11 @@ import React from "react"
 type ButtonSearchProps = {
   isSelected?: boolean
   onToggle?: (isSelected: boolean) => void
-  isAuthenticated: boolean
 }
 
 export function ButtonSearch({
   isSelected = false,
   onToggle,
-  isAuthenticated,
 }: ButtonSearchProps) {
   const handleClick = () => {
     const newState = !isSelected

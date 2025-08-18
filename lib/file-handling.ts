@@ -47,9 +47,8 @@ export async function validateFile(
   return { isValid: true }
 }
 
-export async function uploadFile(_supabase: unknown, _file: File): Promise<string> {
-  throw new Error("File uploads to storage are disabled")
-}
+// Note: Persistent file uploads to external storage are intentionally disabled in this app.
+// All file handling is performed client-side via data URLs for images only. Non-image files are skipped.
 
 export function createAttachment(file: File, url: string): Attachment {
   return {
@@ -62,7 +61,7 @@ export function createAttachment(file: File, url: string): Attachment {
 export async function processFiles(
   files: File[],
   chatId: string,
-  userId: string
+  _userId: string
 ): Promise<Attachment[]> {
   const supabase = null
   const attachments: Attachment[] = []

@@ -1,6 +1,4 @@
 "use client"
-
-import { fetchClient } from "@/lib/fetch"
 import { ModelConfig } from "@/lib/models/types"
 import { MODELS } from "@/lib/models"
 import {
@@ -38,6 +36,19 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   const [favoriteModels, setFavoriteModels] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  const FAVORITE_MODELS_STORAGE_KEY = "favorite-models"
+
+  const getFavoriteModelsFromLocalStorage = (): string[] => {
+    if (typeof window === "undefined") return []
+    try {
+      const raw = localStorage.getItem(FAVORITE_MODELS_STORAGE_KEY)
+      const parsed = raw ? (JSON.parse(raw) as unknown) : []
+      return Array.isArray(parsed) ? (parsed as string[]) : []
+    } catch {
+      return []
+    }
+  }
+
   const fetchModels = useCallback(async () => {
     try {
       // Load models directly from in-memory static list and mark accessible
@@ -57,15 +68,10 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
 
   const fetchFavoriteModels = useCallback(async () => {
     try {
-      const response = await fetchClient(
-        "/api/user-preferences/favorite-models"
-      )
-      if (response.ok) {
-        const data = await response.json()
-        setFavoriteModels(data.favorite_models || [])
-      }
+      const models = getFavoriteModelsFromLocalStorage()
+      setFavoriteModels(models)
     } catch (error) {
-      console.error("Failed to fetch favorite models:", error)
+      console.error("Failed to read favorite models from localStorage:", error)
       setFavoriteModels([])
     }
   }, [])

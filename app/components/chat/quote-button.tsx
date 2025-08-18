@@ -1,4 +1,4 @@
-import useClickOutside from "@/components/motion-primitives/useClickOutside"
+import useClickOutside from "@/lib/hooks/use-click-outside"
 import { Button } from "@/components/ui/button"
 import { Quotes } from "@phosphor-icons/react"
 import { RefObject, useRef } from "react"

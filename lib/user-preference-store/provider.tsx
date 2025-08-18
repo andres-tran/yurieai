@@ -26,33 +26,7 @@ const UserPreferencesContext = createContext<
   UserPreferencesContextType | undefined
 >(undefined)
 
-async function fetchUserPreferences(): Promise<UserPreferences> {
-  const response = await fetch("/api/user-preferences")
-  if (!response.ok) {
-    throw new Error("Failed to fetch user preferences")
-  }
-  const data = await response.json()
-  return convertFromApiFormat(data)
-}
-
-async function updateUserPreferences(
-  update: Partial<UserPreferences>
-): Promise<UserPreferences> {
-  const response = await fetch("/api/user-preferences", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(convertToApiFormat(update)),
-  })
-
-  if (!response.ok) {
-    throw new Error("Failed to update user preferences")
-  }
-
-  const data = await response.json()
-  return convertFromApiFormat(data)
-}
+// API routes removed; preferences are stored in localStorage only
 
 function getLocalStoragePreferences(): UserPreferences {
   if (typeof window === "undefined") return defaultPreferences
@@ -102,26 +76,11 @@ export function UserPreferencesProvider({
     useQuery<UserPreferences>({
       queryKey: ["user-preferences", userId],
       queryFn: async () => {
-        if (!isAuthenticated) {
-          return getLocalStoragePreferences()
-        }
-
-        try {
-          return await fetchUserPreferences()
-        } catch (error) {
-          console.error(
-            "Failed to fetch user preferences, falling back to localStorage:",
-            error
-          )
-          return getLocalStoragePreferences()
-        }
+        return getLocalStoragePreferences()
       },
       enabled: typeof window !== "undefined",
       staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: (failureCount, error) => {
-        // Only retry for authenticated users and network errors
-        return isAuthenticated && failureCount < 2
-      },
+      retry: 0,
       // Use initial data if available to avoid unnecessary API calls
       initialData:
         initialPreferences && isAuthenticated ? getInitialData() : undefined,
@@ -131,22 +90,8 @@ export function UserPreferencesProvider({
   const mutation = useMutation({
     mutationFn: async (update: Partial<UserPreferences>) => {
       const updated = { ...preferences, ...update }
-
-      if (!isAuthenticated) {
-        saveToLocalStorage(updated)
-        return updated
-      }
-
-      try {
-        return await updateUserPreferences(update)
-      } catch (error) {
-        console.error(
-          "Failed to update user preferences in database, falling back to localStorage:",
-          error
-        )
-        saveToLocalStorage(updated)
-        return updated
-      }
+      saveToLocalStorage(updated)
+      return updated
     },
     onMutate: async (update) => {
       const queryKey = ["user-preferences", userId]

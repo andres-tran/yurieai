@@ -29,7 +29,6 @@ type ChatInputProps = {
   hasSuggestions?: boolean
   onSelectModel: (model: string) => void
   selectedModel: string
-  isUserAuthenticated: boolean
   stop: () => void
   status?: "submitted" | "streaming" | "ready" | "error"
   setEnableSearch: (enabled: boolean) => void
@@ -49,7 +48,6 @@ export function ChatInput({
   hasSuggestions,
   onSelectModel,
   selectedModel,
-  isUserAuthenticated,
   stop,
   status,
   setEnableSearch,
@@ -180,22 +178,16 @@ export function ChatInput({
           />
           <PromptInputActions className="mt-3 w-full justify-between p-2">
             <div className="flex gap-2">
-              <ButtonFileUpload
-                onFileUpload={onFileUpload}
-                isUserAuthenticated={isUserAuthenticated}
-                model={selectedModel}
-              />
+              <ButtonFileUpload onFileUpload={onFileUpload} model={selectedModel} />
               <ModelSelector
                 selectedModelId={selectedModel}
                 setSelectedModelId={onSelectModel}
-                isUserAuthenticated={isUserAuthenticated}
                 className="rounded-full"
               />
               {hasSearchSupport ? (
                 <ButtonSearch
                   isSelected={enableSearch}
                   onToggle={setEnableSearch}
-                  isAuthenticated={isUserAuthenticated}
                 />
               ) : null}
             </div>

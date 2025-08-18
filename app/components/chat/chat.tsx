@@ -9,15 +9,9 @@ import { useMessages } from "@/lib/chat-store/messages/provider"
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
-import dynamic from "next/dynamic"
 import { useCallback, useMemo, useState } from "react"
 import { useChatCore } from "./use-chat-core"
 import { useFileUpload } from "./use-file-upload"
-
-const FeedbackWidget = dynamic(
-  () => import("./feedback-widget").then((mod) => mod.FeedbackWidget),
-  { ssr: false }
-)
 
 // Auth dialog removed
 
@@ -131,7 +125,6 @@ export function Chat() {
       hasSuggestions: messages.length === 0,
       onSelectModel: handleModelChange,
       selectedModel,
-      isUserAuthenticated: isAuthenticated,
       stop,
       status,
       setEnableSearch,

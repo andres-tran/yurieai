@@ -47,7 +47,7 @@ export default async function RootLayout({
       >
         <TanstackQueryProvider>
           <ModelProvider>
-            <ChatsProvider userId={userProfile?.id}>
+            <ChatsProvider>
               <UserPreferencesProvider
                 userId={userProfile?.id}
                 initialPreferences={userProfile?.preferences}

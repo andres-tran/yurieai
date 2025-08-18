@@ -1,5 +1,4 @@
 import { toast } from "@/components/ui/toast"
-import { fetchClient } from "@/lib/fetch"
 import { useModel } from "@/lib/model-store/provider"
 import { debounce } from "@/lib/utils"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -14,6 +13,31 @@ export function useFavoriteModels() {
   const { favoriteModels: initialFavoriteModels, refreshFavoriteModelsSilent } =
     useModel()
 
+  const FAVORITE_MODELS_STORAGE_KEY = "favorite-models"
+
+  const getFavoriteModelsFromLocalStorage = (): string[] => {
+    if (typeof window === "undefined") return []
+    try {
+      const raw = localStorage.getItem(FAVORITE_MODELS_STORAGE_KEY)
+      const parsed = raw ? (JSON.parse(raw) as unknown) : []
+      return Array.isArray(parsed) ? (parsed as string[]) : []
+    } catch {
+      return []
+    }
+  }
+
+  const saveFavoriteModelsToLocalStorage = (models: string[]): void => {
+    if (typeof window === "undefined") return
+    try {
+      localStorage.setItem(
+        FAVORITE_MODELS_STORAGE_KEY,
+        JSON.stringify(models)
+      )
+    } catch {
+      // ignore quota errors
+    }
+  }
+
   // Ensure we always have an array
   const safeInitialData = Array.isArray(initialFavoriteModels)
     ? initialFavoriteModels
@@ -26,18 +50,7 @@ export function useFavoriteModels() {
     error,
   } = useQuery<string[]>({
     queryKey: ["favorite-models"],
-    queryFn: async () => {
-      const response = await fetchClient(
-        "/api/user-preferences/favorite-models"
-      )
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch favorite models")
-      }
-
-      const data: FavoriteModelsResponse = await response.json()
-      return data.favorite_models || []
-    },
+    queryFn: async () => getFavoriteModelsFromLocalStorage(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
     initialData: safeInitialData,
@@ -46,31 +59,8 @@ export function useFavoriteModels() {
   // Mutation to update favorite models
   const updateFavoriteModelsMutation = useMutation({
     mutationFn: async (favoriteModels: string[]) => {
-      const response = await fetchClient(
-        "/api/user-preferences/favorite-models",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            favorite_models: favoriteModels,
-          }),
-        }
-      )
-
-      if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ error: "Unknown error" }))
-        throw new Error(
-          errorData.error ||
-            `Failed to save favorite models: ${response.statusText}`
-        )
-      }
-
-      const result = await response.json()
-      return result
+      saveFavoriteModelsToLocalStorage(favoriteModels)
+      return { success: true }
     },
     onMutate: async (newFavoriteModels) => {
       // Cancel any outgoing refetches

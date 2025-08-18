@@ -1,8 +1,4 @@
-import {
-  cacheMessages,
-  getCachedMessages,
-  getMessagesFromDb,
-} from "@/lib/chat-store/messages/api"
+import { getMessages, setMessages } from "@/lib/chat-store/store"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 interface ChatMessage {
@@ -56,7 +52,7 @@ export function useChatPreview(): UseChatPreviewReturn {
 
       try {
         // Check cache first
-        const cached = await getCachedMessages(chatId)
+        const cached = await getMessages(chatId)
 
         if (cached && cached.length > 0) {
           // If we have cached messages, show them immediately
@@ -76,17 +72,17 @@ export function useChatPreview(): UseChatPreviewReturn {
             setMessages(cachedMessages)
           }
         } else {
-          // No cache, fetch from database
+          // No DB, nothing to fetch
           setIsLoading(true)
 
-          const fresh = await getMessagesFromDb(chatId)
+          const fresh: any[] = []
           if (
             fresh &&
             currentRequestRef.current === chatId &&
             !controller.signal.aborted
           ) {
             // Cache the fresh messages
-            await cacheMessages(chatId, fresh)
+            await setMessages(chatId, fresh)
 
             const freshMessages = fresh
               .slice(-5) // Get last 5 messages

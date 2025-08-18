@@ -4,14 +4,7 @@ import { toast } from "@/components/ui/toast"
 import { createContext, useContext, useEffect, useState } from "react"
 import { MODEL_DEFAULT, SYSTEM_PROMPT_DEFAULT } from "../../config"
 import type { Chats } from "../types"
-import {
-  createNewChat as createNewChatFromDb,
-  deleteChat as deleteChatFromDb,
-  fetchAndCacheChats,
-  getCachedChats,
-  updateChatModel as updateChatModelFromDb,
-  updateChatTitle,
-} from "./api"
+import { getChats, updateChatModelLocal, updateChatTitleLocal, deleteChatLocal } from "../store"
 
 interface ChatsContextType {
   chats: Chats[]
@@ -46,25 +39,21 @@ export function useChats() {
 }
 
 export function ChatsProvider({
-  userId,
   children,
 }: {
-  userId?: string
   children: React.ReactNode
 }) {
   const [isLoading, setIsLoading] = useState(true)
   const [chats, setChats] = useState<Chats[]>([])
 
   useEffect(() => {
-    if (!userId) return
-
     const load = async () => {
       setIsLoading(true)
-      const cached = await getCachedChats()
+      const cached = await getChats()
       setChats(cached)
 
       try {
-        const fresh = await fetchAndCacheChats(userId)
+        const fresh = await getChats()
         setChats(fresh)
       } finally {
         setIsLoading(false)
@@ -72,12 +61,10 @@ export function ChatsProvider({
     }
 
     load()
-  }, [userId])
+  }, [])
 
   const refresh = async () => {
-    if (!userId) return
-
-    const fresh = await fetchAndCacheChats(userId)
+    const fresh = await getChats()
     setChats(fresh)
   }
 
@@ -91,7 +78,7 @@ export function ChatsProvider({
     )
     setChats(sorted)
     try {
-      await updateChatTitle(id, title)
+      await updateChatTitleLocal(id, title)
     } catch {
       setChats(prev)
       toast({ title: "Failed to update title", status: "error" })
@@ -107,7 +94,7 @@ export function ChatsProvider({
     setChats((prev) => prev.filter((c) => c.id !== id))
 
     try {
-      await deleteChatFromDb(id)
+      await deleteChatLocal(id)
       if (id === currentChatId && redirect) redirect()
     } catch {
       setChats(prev)
@@ -116,14 +103,13 @@ export function ChatsProvider({
   }
 
   const createNewChat = async (
-    userId: string,
+    _userId: string,
     title?: string,
     model?: string,
     isAuthenticated?: boolean,
     systemPrompt?: string,
     projectId?: string
   ) => {
-    if (!userId) return
     const prev = [...chats]
 
     const optimisticId = `optimistic-${Date.now().toString()}`
@@ -133,7 +119,7 @@ export function ChatsProvider({
       created_at: new Date().toISOString(),
       model: model || MODEL_DEFAULT,
       system_prompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-      user_id: userId,
+      user_id: "local",
       public: true,
       updated_at: new Date().toISOString(),
       project_id: null,
@@ -141,13 +127,19 @@ export function ChatsProvider({
     setChats((prev) => [optimisticChat, ...prev])
 
     try {
-      const newChat = await createNewChatFromDb(
-        userId,
-        title,
-        model,
-        isAuthenticated,
-        projectId
-      )
+      const newChat = {
+        id: (typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `chat-${Date.now()}`) as string,
+        title: title || "New Chat",
+        model: model || MODEL_DEFAULT,
+        system_prompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
+        user_id: "local",
+        public: true,
+        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        project_id: null,
+      } as Chats
 
       setChats((prev) => [
         newChat,
@@ -174,7 +166,7 @@ export function ChatsProvider({
     const prev = [...chats]
     setChats((prev) => prev.map((c) => (c.id === id ? { ...c, model } : c)))
     try {
-      await updateChatModelFromDb(id, model)
+      await updateChatModelLocal(id, model)
     } catch {
       setChats(prev)
       toast({ title: "Failed to update model", status: "error" })

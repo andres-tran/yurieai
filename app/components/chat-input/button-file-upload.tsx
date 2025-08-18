@@ -17,13 +17,11 @@ import React from "react"
 
 type ButtonFileUploadProps = {
   onFileUpload: (files: File[]) => void
-  isUserAuthenticated: boolean
   model: string
 }
 
 export function ButtonFileUpload({
   onFileUpload,
-  isUserAuthenticated,
   model,
 }: ButtonFileUploadProps) {
   // Always allow local file attachments (inline images only)

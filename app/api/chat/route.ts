@@ -9,7 +9,6 @@ export const maxDuration = 60
 type ChatRequest = {
   messages: MessageAISDK[]
   chatId: string
-  userId: string
   model: string
   systemPrompt: string
   enableSearch: boolean
@@ -17,16 +16,10 @@ type ChatRequest = {
 
 export async function POST(req: Request) {
   try {
-    const {
-      messages,
-      chatId,
-      userId,
-      model,
-      systemPrompt,
-      enableSearch,
-    } = (await req.json()) as ChatRequest
+    const { messages, chatId, model, systemPrompt, enableSearch } =
+      (await req.json()) as ChatRequest
 
-    if (!messages || !chatId || !userId) {
+    if (!messages || !chatId) {
       return new Response(
         JSON.stringify({ error: "Error, missing information" }),
         { status: 400 }

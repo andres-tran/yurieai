@@ -36,9 +36,7 @@ export interface Message {
 }
 
 export interface ChatApiParams {
-  userId: string
   model: string
-  isAuthenticated: boolean
 }
 
 export interface LogUserMessageParams {}
