@@ -31,7 +31,7 @@ export function ButtonSearch({
       )}
       onClick={handleClick}
     >
-      <GlobeIcon className="size-4" />
+      <GlobeIcon className="size-5" />
       <span className="hidden md:block">Search</span>
     </Button>
   )
