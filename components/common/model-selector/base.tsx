@@ -129,9 +129,9 @@ export function ModelSelector({
     >
       <div className="flex items-center gap-2">
         {currentProvider?.icon && <currentProvider.icon className="size-5" />}
-        <span>{currentModel?.name || "Select model"}</span>
+        {!isMobile && <span>{currentModel?.name || "Select model"}</span>}
       </div>
-      <CaretDownIcon className="size-4 opacity-50" />
+      {!isMobile && <CaretDownIcon className="size-4 opacity-50" />}
     </Button>
   )
 

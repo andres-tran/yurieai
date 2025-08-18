@@ -179,17 +179,17 @@ export function ChatInput({
           <PromptInputActions className="mt-3 w-full justify-between p-2">
             <div className="flex gap-2">
               <ButtonFileUpload onFileUpload={onFileUpload} model={selectedModel} />
-              <ModelSelector
-                selectedModelId={selectedModel}
-                setSelectedModelId={onSelectModel}
-                className="rounded-full"
-              />
               {hasSearchSupport ? (
                 <ButtonSearch
                   isSelected={enableSearch}
                   onToggle={setEnableSearch}
                 />
               ) : null}
+              <ModelSelector
+                selectedModelId={selectedModel}
+                setSelectedModelId={onSelectModel}
+                className="rounded-full"
+              />
             </div>
             <PromptInputAction
               tooltip={status === "streaming" ? "Stop" : "Send"}
