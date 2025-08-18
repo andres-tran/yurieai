@@ -11,7 +11,18 @@ const nextConfig: NextConfig = withBundleAnalyzer({
   },
   serverExternalPackages: ["shiki", "vscode-oniguruma"],
   images: {
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "www.google.com",
+        pathname: "/s2/favicons",
+      },
+      {
+        protocol: "https",
+        hostname: "www.google.com",
+        pathname: "/s2/favicons/**",
+      },
+    ],
   },
   eslint: {
     ignoreDuringBuilds: true,

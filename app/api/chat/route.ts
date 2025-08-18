@@ -1,5 +1,6 @@
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { getAllModels } from "@/lib/models"
+import { openproviders } from "@/lib/openproviders"
 import { Message as MessageAISDK, streamText } from "ai"
 // usage tracking removed
 import { createErrorResponse, extractErrorMessage } from "./utils"
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
     const allModels = await getAllModels()
     const modelConfig = allModels.find((m) => m.id === model)
 
-    if (!modelConfig || !modelConfig.apiSdk) {
+    if (!modelConfig) {
       throw new Error(`Model ${model} not found`)
     }
 
@@ -51,7 +52,11 @@ export async function POST(req: Request) {
     }
 
     const result = streamText({
-      model: modelConfig.apiSdk(apiKey, { enableSearch }),
+      model:
+        // Prefer server-side construction to avoid leaking provider impl to client bundles
+        (modelConfig as any).apiSdk
+          ? (modelConfig as any).apiSdk(apiKey, { enableSearch })
+          : openproviders(model as any, undefined, apiKey),
       system: effectiveSystemPrompt,
       messages: messages,
       temperature: 1,

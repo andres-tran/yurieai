@@ -47,7 +47,7 @@ export function useChatCore({
   // State management
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
-  const [enableSearch, setEnableSearch] = useState(false)
+  const [enableSearch, setEnableSearch] = useState(true)
 
   // Refs and derived state
   const hasSentFirstMessageRef = useRef(false)

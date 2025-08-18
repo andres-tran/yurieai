@@ -69,13 +69,14 @@ export function Conversation({
               </Message>
             )
           })}
-          {status === "submitted" &&
-            messages.length > 0 &&
-            messages[messages.length - 1].role === "user" && (
-              <div className="group min-h-scroll-anchor flex w-full max-w-3xl flex-col items-start gap-2 px-6 pb-2">
-                <Loader />
-              </div>
-            )}
+          {(status === "submitted" ||
+            (status === "streaming" &&
+              messages.length > 0 &&
+              messages[messages.length - 1].role === "user")) && (
+            <div className="group min-h-scroll-anchor flex w-full max-w-3xl flex-col items-start gap-2 px-6 pb-2">
+              <Loader align="start" />
+            </div>
+          )}
           <div className="absolute bottom-0 flex w-full max-w-3xl flex-1 items-end justify-end gap-4 px-6 pb-2">
             <ScrollButton className="absolute top-[-50px] right-[30px]" />
           </div>

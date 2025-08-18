@@ -1,4 +1,3 @@
-import { openproviders } from "@/lib/openproviders"
 import { ModelConfig } from "../types"
 
 const openaiModels: ModelConfig[] = [
@@ -14,6 +13,7 @@ const openaiModels: ModelConfig[] = [
     contextWindow: 1048576,
     vision: true,
     tools: true,
+    webSearch: true,
     audio: false,
     openSource: false,
     speed: "Medium",
@@ -21,7 +21,6 @@ const openaiModels: ModelConfig[] = [
     apiDocs: "https://platform.openai.com/docs/models",
     modelPage: "https://platform.openai.com/docs/models",
     icon: "openai",
-    apiSdk: (apiKey?: string) => openproviders("gpt-5", undefined, apiKey),
   },
   {
     id: "gpt-5-mini",
@@ -35,6 +34,7 @@ const openaiModels: ModelConfig[] = [
     contextWindow: 524288,
     vision: true,
     tools: true,
+    webSearch: true,
     audio: false,
     openSource: false,
     speed: "Fast",
@@ -42,8 +42,6 @@ const openaiModels: ModelConfig[] = [
     apiDocs: "https://platform.openai.com/docs/models",
     modelPage: "https://platform.openai.com/docs/models",
     icon: "openai",
-    apiSdk: (apiKey?: string) =>
-      openproviders("gpt-5-mini", undefined, apiKey),
   },
   {
     id: "gpt-5-nano",
@@ -57,6 +55,7 @@ const openaiModels: ModelConfig[] = [
     contextWindow: 262144,
     vision: true,
     tools: true,
+    webSearch: true,
     audio: false,
     openSource: false,
     speed: "Fast",
@@ -64,8 +63,6 @@ const openaiModels: ModelConfig[] = [
     apiDocs: "https://platform.openai.com/docs/models",
     modelPage: "https://platform.openai.com/docs/models",
     icon: "openai",
-    apiSdk: (apiKey?: string) =>
-      openproviders("gpt-5-nano", undefined, apiKey),
   },
 ]
 

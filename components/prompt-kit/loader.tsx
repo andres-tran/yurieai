@@ -1,6 +1,7 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion } from "motion/react"
+import { cn } from "@/lib/utils"
 
 // Style constants
 const DOT_SIZE = "size-2"
@@ -26,9 +27,17 @@ const TRANSITION = {
   repeatType: "loop",
 } as const
 
-export function Loader() {
+export function Loader({
+  align = "start",
+  className,
+}: {
+  align?: "start" | "center" | "end"
+  className?: string
+}) {
+  const justifyClass =
+    align === "end" ? "justify-end" : align === "center" ? "justify-center" : "justify-start"
   return (
-    <div className={`flex items-center justify-center ${DOT_SPACING}`}>
+    <div className={cn("flex items-center", justifyClass, DOT_SPACING, className)}>
       <Dot delay={DELAY_DOT_1} />
       <Dot delay={DELAY_DOT_2} />
       <Dot delay={DELAY_DOT_3} />

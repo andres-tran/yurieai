@@ -22,7 +22,9 @@ export function openproviders<T extends SupportedModel>(
       apiKey,
       compatibility: "strict",
     })
-    return openaiProvider(modelId as OpenAIModel, settings as OpenAIChatSettings)
+    // Use the Responses API model to support provider-defined tools like web_search_preview
+    return openaiProvider.responses(modelId as OpenAIModel)
   }
-  return openai(modelId as OpenAIModel, settings as OpenAIChatSettings)
+  // Use the default provider in strict mode and Responses API variant
+  return openai.responses(modelId as OpenAIModel)
 }

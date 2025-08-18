@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
 import { useCallback, useRef } from "react"
+import { Loader } from "@/components/prompt-kit/loader"
 import { getSources } from "./get-sources"
 import { QuoteButton } from "./quote-button"
 import { Reasoning } from "./reasoning"
@@ -117,7 +118,13 @@ export function MessageAssistant({
           <SearchImages results={searchImageResults} />
         )}
 
-        {contentNullOrEmpty ? null : (
+        {contentNullOrEmpty ? (
+          status === "streaming" && (
+            <div className="mt-1">
+              <Loader align="start" />
+            </div>
+          )
+        ) : (
           <MessageContent
             className={cn(
               "prose dark:prose-invert relative min-w-full bg-transparent p-0",
