@@ -177,7 +177,7 @@ export function ChatInput({
             className="min-h-[44px] pt-3 pl-4 text-base leading-[1.3] sm:text-base md:text-base"
           />
           <PromptInputActions className="mt-3 w-full justify-between p-2">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <ButtonFileUpload onFileUpload={onFileUpload} model={selectedModel} />
               {hasSearchSupport ? (
                 <ButtonSearch
