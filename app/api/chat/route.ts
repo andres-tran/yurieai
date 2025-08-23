@@ -51,6 +51,7 @@ export async function POST(req: Request) {
       )
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = streamText({
       model:
         // Prefer server-side construction to avoid leaking provider impl to client bundles
@@ -72,6 +73,7 @@ export async function POST(req: Request) {
             }),
           }
         : undefined,
+      reasoning: { effort: "high" },
       maxSteps: 10,
       onError: (err: unknown) => {
         console.error("Streaming error occurred:", err)
@@ -79,7 +81,7 @@ export async function POST(req: Request) {
       },
 
       onFinish: async () => {},
-    })
+    } as any)
 
     return result.toDataStreamResponse({
       sendReasoning: true,
