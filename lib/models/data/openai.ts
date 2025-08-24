@@ -61,6 +61,25 @@ const openaiModels: ModelConfig[] = [
     apiDocs: "https://platform.openai.com/docs/models",
     modelPage: "https://platform.openai.com/docs/models",
   },
+  {
+    id: "gpt-image-1",
+    name: "GPT-Image 1",
+    provider: "OpenAI",
+    providerId: "openai",
+    modelFamily: "GPT-Image",
+    baseProviderId: "openai",
+    description: "Image generation model",
+    tags: ["image", "generation"],
+    vision: true,
+    tools: false,
+    webSearch: false,
+    audio: false,
+    openSource: false,
+    speed: "Medium",
+    website: "https://openai.com",
+    apiDocs: "https://platform.openai.com/docs/models",
+    modelPage: "https://platform.openai.com/docs/models",
+  },
 ]
 
 export { openaiModels }
