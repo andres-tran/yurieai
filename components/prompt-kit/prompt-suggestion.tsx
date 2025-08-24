@@ -101,7 +101,7 @@ function PromptSuggestion({
                   {before}
                 </span>
               )}
-              <span className="text-primary font-medium group-hover:!text-accent-foreground whitespace-pre-wrap">
+              <span className="text-primary group-hover:!text-accent-foreground font-medium whitespace-pre-wrap">
                 {actualHighlightedText}
               </span>
               {after && (
