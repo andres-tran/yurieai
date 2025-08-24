@@ -45,17 +45,20 @@ export async function POST(req: Request) {
       // useful for clients. Attempt to parse a JSON error message and fall back to
       // a generic one when parsing fails.
       let message: string;
+      let code: string | undefined;
       try {
         const errText = await response.text();
         const parsed = JSON.parse(errText);
         message =
           parsed.error?.message || parsed.message || "Request to OpenAI failed";
+        code = parsed.error?.code;
       } catch {
         message = "Request to OpenAI failed";
       }
 
       return createErrorResponse({
         message,
+        code,
         statusCode: response.status,
       });
     }
