@@ -14,7 +14,7 @@ const DELAY_DOT_1 = 0
 const DELAY_DOT_2 = 0.1
 const DELAY_DOT_3 = 0.2
 
-// Animation settings
+// Animation configuration
 const ANIMATION = {
   y: ["0%", "-60%", "0%"],
   opacity: [1, 0.7, 1],

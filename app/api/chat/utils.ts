@@ -22,7 +22,7 @@ export function extractErrorMessage(error: unknown): string {
       error.message.includes("invalid x-api-key") ||
       error.message.includes("authentication_error")
     ) {
-      return "Invalid API key or authentication failed. Please check your API key in settings."
+      return "Invalid API key or authentication failed. Please check your API key."
     } else if (
       error.message.includes("402") ||
       error.message.includes("payment") ||
@@ -43,7 +43,7 @@ export function extractErrorMessage(error: unknown): string {
   const aiError = (error as any)?.error
   if (aiError) {
     if (aiError.statusCode === 401) {
-      return "Invalid API key or authentication failed. Please check your API key in settings."
+      return "Invalid API key or authentication failed. Please check your API key."
     } else if (aiError.statusCode === 402) {
       return "Insufficient credits or payment required."
     } else if (aiError.statusCode === 429) {
