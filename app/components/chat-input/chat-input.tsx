@@ -59,7 +59,7 @@ export function ChatInput({
       return
     }
 
-    if (status === "streaming") {
+    if (status === "streaming" || status === "submitted") {
       stop()
       return
     }
@@ -74,7 +74,7 @@ export function ChatInput({
         return
       }
 
-      if (e.key === "Enter" && status === "streaming") {
+      if (e.key === "Enter" && (status === "streaming" || status === "submitted")) {
         e.preventDefault()
         return
       }
@@ -183,20 +183,25 @@ export function ChatInput({
               />
             </div>
             <PromptInputAction
-              tooltip={status === "streaming" ? "Stop" : "Send"}
+              tooltip={status === "streaming" || status === "submitted" ? "Stop" : "Send"}
             >
               <Button
                 size="sm"
                 className="size-9 rounded-full transition-all duration-300 ease-out"
                 disabled={
                   status !== "streaming" &&
+                  status !== "submitted" &&
                   (!value || isSubmitting || isOnlyWhitespace(value))
                 }
                 type="button"
                 onClick={handleSend}
-                aria-label={status === "streaming" ? "Stop" : "Send message"}
+                aria-label={
+                  status === "streaming" || status === "submitted"
+                    ? "Stop"
+                    : "Send message"
+                }
               >
-                {status === "streaming" ? (
+                {status === "streaming" || status === "submitted" ? (
                   <StopIcon className="size-4" />
                 ) : (
                   <ArrowUpIcon className="size-4" />
