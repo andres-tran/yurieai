@@ -50,6 +50,7 @@ OPENAI_API_KEY=your_openai_api_key
 - `gpt-5` — highest quality, best reasoning
 - `gpt-5-mini` — balanced quality/speed
 - `gpt-5-nano` — fastest and cheapest
+- `gpt-image-1` — image generation
 
 ## Production Deployment
 
