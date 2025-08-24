@@ -1,6 +1,6 @@
 "use client"
 
-import { useBreakpoint } from "@/app/hooks/use-breakpoint"
+import { useBreakpoint } from "@/lib/hooks/use-breakpoint"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,

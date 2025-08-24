@@ -1,6 +1,6 @@
 "use client"
 
-import { useChatDraft } from "@/app/hooks/use-chat-draft"
+import { useChatDraft } from "@/lib/hooks/use-chat-draft"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import Link from "next/link"
 import { DialogPublish } from "./dialog-publish"

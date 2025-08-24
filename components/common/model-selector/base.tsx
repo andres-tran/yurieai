@@ -1,7 +1,7 @@
 "use client"
 
-import { useBreakpoint } from "@/app/hooks/use-breakpoint"
-import { useKeyShortcut } from "@/app/hooks/use-key-shortcut"
+import { useBreakpoint } from "@/lib/hooks/use-breakpoint"
+import { useKeyShortcut } from "@/lib/hooks/use-key-shortcut"
 import { Button } from "@/components/ui/button"
 import {
   Drawer,

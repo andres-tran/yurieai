@@ -1,6 +1,6 @@
 "use client"
 
-import { Header } from "@/app/components/layout/header"
+import { Header } from "@/components/layout/header"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 
 export function LayoutApp({ children }: { children: React.ReactNode }) {
