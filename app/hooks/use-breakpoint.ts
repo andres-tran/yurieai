@@ -1,5 +1,7 @@
 import * as React from "react"
 
+export const MOBILE_BREAKPOINT = 768
+
 export function useBreakpoint(breakpoint: number) {
   const [isBelowBreakpoint, setIsBelowBreakpoint] = React.useState<
     boolean | undefined
@@ -16,4 +18,8 @@ export function useBreakpoint(breakpoint: number) {
   }, [breakpoint])
 
   return !!isBelowBreakpoint
+}
+
+export function useIsMobile() {
+  return useBreakpoint(MOBILE_BREAKPOINT)
 }
