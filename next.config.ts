@@ -22,6 +22,10 @@ const nextConfig: NextConfig = withBundleAnalyzer({
         hostname: "www.google.com",
         pathname: "/s2/favicons/**",
       },
+      {
+        protocol: "https",
+        hostname: "**",
+      },
     ],
   },
   eslint: {
