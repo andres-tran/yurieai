@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button"
 import { getModelInfo } from "@/lib/models"
 import { ArrowUpIcon, StopIcon } from "@phosphor-icons/react"
 import { useCallback, useEffect, useMemo, useRef } from "react"
-import { PromptSystem } from "../suggestions/prompt-system"
 import { ButtonFileUpload } from "./button-file-upload"
 import { ButtonSearch } from "./button-search"
 import { FileList } from "./file-list"
@@ -25,8 +24,6 @@ type ChatInputProps = {
   files: File[]
   onFileUpload: (files: File[]) => void
   onFileRemove: (file: File) => void
-  onSuggestion: (suggestion: string) => void
-  hasSuggestions?: boolean
   onSelectModel: (model: string) => void
   selectedModel: string
   stop: () => void
@@ -44,8 +41,6 @@ export function ChatInput({
   files,
   onFileUpload,
   onFileRemove,
-  onSuggestion,
-  hasSuggestions,
   onSelectModel,
   selectedModel,
   stop,
@@ -154,13 +149,6 @@ export function ChatInput({
 
   return (
     <div className="relative flex w-full flex-col gap-4">
-      {hasSuggestions && (
-        <PromptSystem
-          onValueChange={onValueChange}
-          onSuggestion={onSuggestion}
-          value={value}
-        />
-      )}
       <div className="relative order-2 px-2 pb-3 sm:pb-4 md:order-1">
         <PromptInput
           className="bg-popover relative z-10 p-0 pt-1 shadow-xs backdrop-blur-xl"

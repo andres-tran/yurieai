@@ -258,69 +258,6 @@ export function useChatCore({
     setIsSubmitting,
   ])
 
-  // Handle suggestion
-  const handleSuggestion = useCallback(
-    async (suggestion: string) => {
-      setIsSubmitting(true)
-      const optimisticId = `optimistic-${Date.now().toString()}`
-      const optimisticMessage = {
-        id: optimisticId,
-        content: suggestion,
-        role: "user" as const,
-        createdAt: new Date(),
-      }
-
-      setMessages((prev) => [...prev, optimisticMessage])
-
-      try {
-        const currentChatId =
-          chatId ||
-          localStorage.getItem("guestChatId") ||
-          (() => {
-            const newId = crypto.randomUUID()
-            localStorage.setItem("guestChatId", newId)
-            return newId
-          })()
-
-        if (!currentChatId) {
-          setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-          return
-        }
-
-        const options = {
-          body: {
-            chatId: currentChatId,
-            model: selectedModel,
-            systemPrompt: SYSTEM_PROMPT_DEFAULT,
-          },
-        }
-
-        append(
-          {
-            role: "user",
-            content: suggestion,
-          },
-          options
-        )
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      } catch {
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-        toast({ title: "Failed to send suggestion", status: "error" })
-      } finally {
-        setIsSubmitting(false)
-      }
-    },
-    [
-      chatId,
-      selectedModel,
-      user,
-      append,
-      isAuthenticated,
-      setMessages,
-      setIsSubmitting,
-    ]
-  )
-
   // Handle reload
   const handleReload = useCallback(async () => {
     const currentChatId =
@@ -392,7 +329,6 @@ export function useChatCore({
 
     // Actions
     submit,
-    handleSuggestion,
     handleReload,
     handleInputChange,
   }
