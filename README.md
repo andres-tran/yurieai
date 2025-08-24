@@ -50,7 +50,7 @@ OPENAI_API_KEY=your_openai_api_key
 - `gpt-5` — highest quality, best reasoning
 - `gpt-5-mini` — balanced quality/speed
 - `gpt-5-nano` — fastest and cheapest
-- Image Generation — generate images through the `/api/images` endpoint, which uses the OpenAI Responses API with the image generation tool and returns a base64-encoded PNG in the `image` field.
+- Image Generation — generate images through the `/api/images` endpoint using the OpenAI Responses API's image modality and returning a base64-encoded PNG in the `image` field.
 
 ## Production Deployment
 
