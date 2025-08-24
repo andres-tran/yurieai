@@ -52,6 +52,8 @@ OPENAI_API_KEY=your_openai_api_key
 - `gpt-5-nano` — fastest and cheapest
 - `gpt-image-1` — image generation
 
+Use `gpt-image-1` through the `/api/images` endpoint, which calls the OpenAI Images API. It returns a base64-encoded PNG in the `image` field.
+
 ## Production Deployment
 
 ### Deploy to Vercel
