@@ -28,7 +28,12 @@ function PromptSuggestion({
       <Button
         variant={variant || "outline"}
         size={size || "lg"}
-        className={cn("rounded-full", className)}
+        className={cn(
+          "rounded-full",
+          "hover:text-accent-foreground",
+          className
+        )}
+        title={content || undefined}
         {...props}
       >
         {children}
@@ -42,10 +47,11 @@ function PromptSuggestion({
         variant={variant || "ghost"}
         size={size || "sm"}
         className={cn(
-          "w-full justify-start rounded-xl py-2",
-          "hover:bg-accent",
+          "group w-full justify-start rounded-xl py-2",
+          "hover:bg-accent hover:text-accent-foreground",
           className
         )}
+        title={content || undefined}
         {...props}
       >
         {children}
@@ -63,10 +69,11 @@ function PromptSuggestion({
       variant={variant || "ghost"}
       size={size || "sm"}
       className={cn(
-        "w-full justify-start gap-0 rounded-xl py-2",
-        "hover:bg-accent",
+        "group w-full justify-start gap-0 rounded-xl py-2",
+        "hover:bg-accent hover:text-accent-foreground",
         className
       )}
+      title={content || undefined}
       {...props}
     >
       {shouldHighlight ? (
@@ -74,7 +81,7 @@ function PromptSuggestion({
           const index = contentLower.indexOf(highlightLower)
           if (index === -1)
             return (
-              <span className="text-muted-foreground whitespace-pre-wrap">
+              <span className="text-muted-foreground group-hover:!text-accent-foreground whitespace-pre-wrap">
                 {content}
               </span>
             )
@@ -90,15 +97,15 @@ function PromptSuggestion({
           return (
             <>
               {before && (
-                <span className="text-muted-foreground whitespace-pre-wrap">
+                <span className="text-muted-foreground group-hover:!text-accent-foreground whitespace-pre-wrap">
                   {before}
                 </span>
               )}
-              <span className="text-primary font-medium whitespace-pre-wrap">
+              <span className="text-primary font-medium group-hover:!text-accent-foreground whitespace-pre-wrap">
                 {actualHighlightedText}
               </span>
               {after && (
-                <span className="text-muted-foreground whitespace-pre-wrap">
+                <span className="text-muted-foreground group-hover:!text-accent-foreground whitespace-pre-wrap">
                   {after}
                 </span>
               )}
@@ -106,7 +113,7 @@ function PromptSuggestion({
           )
         })()
       ) : (
-        <span className="text-muted-foreground whitespace-pre-wrap">
+        <span className="text-muted-foreground group-hover:!text-accent-foreground whitespace-pre-wrap">
           {content}
         </span>
       )}
