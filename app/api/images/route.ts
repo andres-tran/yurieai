@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const response = await fetch("https://api.openai.com/v1/images", {
+    const response = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model: "gpt-image-1",
         prompt,
+        response_format: "b64_json",
       }),
     });
 
