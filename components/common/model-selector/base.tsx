@@ -73,7 +73,8 @@ export function ModelSelector({
         key={model.id}
         className={cn(
           "flex w-full items-center justify-between px-3 py-1.5",
-          selectedModelId === model.id && "bg-accent text-accent-foreground"
+          selectedModelId === model.id &&
+            "bg-accent text-accent-foreground focus:text-accent-foreground"
         )}
         onClick={() => {
           if (isLocked) {
