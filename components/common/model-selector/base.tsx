@@ -35,14 +35,12 @@ type ModelSelectorProps = {
   selectedModelId: string
   setSelectedModelId: (modelId: string) => void
   className?: string
-  isUserAuthenticated?: boolean
 }
 
 export function ModelSelector({
   selectedModelId,
   setSelectedModelId,
   className,
-  isUserAuthenticated = true,
 }: ModelSelectorProps) {
   const { models, isLoading: isLoadingModels, favoriteModels } = useModel()
   const { isModelHidden } = useUserPreferences()
@@ -75,7 +73,7 @@ export function ModelSelector({
         key={model.id}
         className={cn(
           "flex w-full items-center justify-between px-3 py-1.5",
-          selectedModelId === model.id && "bg-accent"
+          selectedModelId === model.id && "bg-accent text-foreground"
         )}
         onClick={() => {
           if (isLocked) {
@@ -214,7 +212,8 @@ export function ModelSelector({
                       key={model.id}
                       className={cn(
                         "flex w-full items-center justify-between px-3 py-1.5",
-                        selectedModelId === model.id && "bg-accent"
+                        selectedModelId === model.id &&
+                          "bg-accent text-foreground focus:text-foreground"
                       )}
                       onSelect={() => {
                         if (isLocked) {
