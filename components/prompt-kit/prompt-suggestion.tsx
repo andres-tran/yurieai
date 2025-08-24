@@ -29,6 +29,7 @@ function PromptSuggestion({
         variant={variant || "outline"}
         size={size || "lg"}
         className={cn("rounded-full", className)}
+        title={content || undefined}
         {...props}
       >
         {children}
@@ -46,6 +47,7 @@ function PromptSuggestion({
           "hover:bg-accent",
           className
         )}
+        title={content || undefined}
         {...props}
       >
         {children}
@@ -67,6 +69,7 @@ function PromptSuggestion({
         "hover:bg-accent",
         className
       )}
+      title={content || undefined}
       {...props}
     >
       {shouldHighlight ? (
