@@ -3,7 +3,7 @@ import { toast } from "@/components/ui/toast"
 // Auth removed
 import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
-import { API_ROUTE_CHAT } from "@/lib/routes"
+import { API_ROUTE_CHAT, API_ROUTE_IMAGES } from "@/lib/routes"
 import type { UserProfile } from "@/lib/user/types"
 import type { Message } from "@ai-sdk/react"
 import { useChat } from "@ai-sdk/react"
@@ -175,6 +175,46 @@ export function useChatCore({
     const submittedFiles = [...files]
     setFiles([])
 
+    if (selectedModel === "gpt-image-1") {
+      try {
+        cacheAndAddMessage(optimisticMessage)
+        clearDraft()
+
+        const response = await fetch(API_ROUTE_IMAGES, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: optimisticMessage.content }),
+        })
+
+        if (!response.ok) {
+          const errText = await response.text()
+          throw new Error(errText)
+        }
+
+        const data = await response.json()
+        const image = data.image as string | undefined
+        if (!image) {
+          throw new Error("No image returned from OpenAI")
+        }
+
+        const assistantMessage = {
+          id: `image-${Date.now().toString()}`,
+          content: `![generated image](data:image/png;base64,${image})`,
+          role: "assistant" as const,
+          createdAt: new Date(),
+        }
+
+        setMessages((prev) => [...prev, assistantMessage])
+        cacheAndAddMessage(assistantMessage)
+      } catch (err) {
+        handleError(err as Error)
+      } finally {
+        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+        setIsSubmitting(false)
+      }
+      return
+    }
+
     try {
       const currentChatId =
         chatId ||
@@ -256,10 +296,15 @@ export function useChatCore({
     messages.length,
     chatId,
     setIsSubmitting,
+    handleError,
   ])
 
   // Handle reload
   const handleReload = useCallback(async () => {
+    if (selectedModel === "gpt-image-1") {
+      return
+    }
+
     const currentChatId =
       chatId ||
       localStorage.getItem("guestChatId") ||
