@@ -72,7 +72,7 @@ export async function POST(req: Request) {
             ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (modelConfig as any).apiSdk(apiKey, { enableSearch })
             : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              openproviders(model as any, undefined, apiKey),
+              openproviders(model as any, apiKey),
       system: effectiveSystemPrompt,
       messages: messages,
       temperature: 1,

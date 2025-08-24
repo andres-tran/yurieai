@@ -15,9 +15,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import { APP_NAME } from "@/lib/config"
 import { useMutation } from "@tanstack/react-query"
-import Image from "next/image"
 
 type ProModelDialogProps = {
   isOpen: boolean
@@ -56,11 +54,11 @@ export function ProModelDialog({
             .
           </p>
           <p className="text-muted-foreground mt-1">
-            Go to{" "}
+            Add your key securely in the{" "}
             <span className="text-primary inline-flex font-medium">
-              Settings → API Keys
+              API Keys
             </span>{" "}
-            to add your key securely.
+            section.
           </p>
           <p className="text-muted-foreground mt-5">
             We don&apos;t support this model yet?
