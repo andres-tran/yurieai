@@ -12,7 +12,6 @@ import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
 import { useCallback, useRef } from "react"
 import { getSources } from "./get-sources"
 import { QuoteButton } from "./quote-button"
-import { Reasoning } from "./reasoning"
 import { SearchImages } from "./search-images"
 import { SourcesList } from "./sources-list"
 import { ToolInvocation } from "./tool-invocation"
@@ -50,10 +49,6 @@ export function MessageAssistant({
   const toolInvocationParts = parts?.filter(
     (part) => part.type === "tool-invocation"
   )
-  const reasoningPart = parts?.find((part) => part.type === "reasoning") as
-    | { reasoning?: string; text?: string }
-    | undefined
-  const reasoningText = reasoningPart?.reasoning ?? reasoningPart?.text ?? ""
   const contentNullOrEmpty = children === null || children === ""
   const isLastStreaming = status === "streaming" && isLast
   const searchImageResults =
@@ -103,13 +98,6 @@ export function MessageAssistant({
         )}
         {...(isQuoteEnabled && { "data-message-id": messageId })}
       >
-        {reasoningPart && (
-          <Reasoning
-            reasoning={reasoningText}
-            isStreaming={status === "streaming"}
-          />
-        )}
-
         {toolInvocationParts &&
           toolInvocationParts.length > 0 &&
           preferences.showToolInvocations && (
