@@ -20,7 +20,6 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/models",
     modelPage: "https://platform.openai.com/docs/models",
-    icon: "openai",
   },
   {
     id: "gpt-5-mini",
@@ -41,7 +40,6 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/models",
     modelPage: "https://platform.openai.com/docs/models",
-    icon: "openai",
   },
   {
     id: "gpt-5-nano",
@@ -62,7 +60,6 @@ const openaiModels: ModelConfig[] = [
     website: "https://openai.com",
     apiDocs: "https://platform.openai.com/docs/models",
     modelPage: "https://platform.openai.com/docs/models",
-    icon: "openai",
   },
 ]
 

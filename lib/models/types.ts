@@ -30,9 +30,6 @@ type ModelConfig = {
   apiDocs?: string // official API docs (e.g. https://platform.openai.com/docs/api-reference)
   modelPage?: string // official product page
   releasedAt?: string // "2024-12-01" (optional, for tracking changes)
-
-  icon?: string // e.g. "openai"
-
   // apiSdk?: () => LanguageModelV1 // "openai("gpt-4.1-nano")"
   apiSdk?: (
     apiKey?: string,

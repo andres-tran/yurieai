@@ -16,7 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import {
   Tooltip,
   TooltipContent,
@@ -25,7 +24,6 @@ import {
 import { useModel } from "@/lib/model-store/provider"
 import { filterAndSortModels } from "@/lib/model-store/utils"
 import { ModelConfig } from "@/lib/models/types"
-import { PROVIDERS } from "@/lib/providers"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import { CaretDownIcon, StarIcon } from "@phosphor-icons/react"
@@ -50,9 +48,6 @@ export function ModelSelector({
   const { isModelHidden } = useUserPreferences()
 
   const currentModel = models.find((model) => model.id === selectedModelId)
-  const currentProvider = PROVIDERS.find(
-    (provider) => provider.id === currentModel?.icon
-  )
   const isMobile = useBreakpoint(768)
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -74,7 +69,6 @@ export function ModelSelector({
 
   const renderModelItem = (model: ModelConfig) => {
     const isLocked = !model.accessible
-    const provider = PROVIDERS.find((provider) => provider.id === model.icon)
 
     return (
       <div
@@ -99,7 +93,6 @@ export function ModelSelector({
         }}
       >
         <div className="flex items-center gap-2.5">
-          {provider?.icon && <provider.icon className="size-4" />}
           <div className="flex flex-col gap-0">
             <span className="text-sm">{model.name}</span>
           </div>
@@ -128,7 +121,6 @@ export function ModelSelector({
       disabled={isLoadingModels}
     >
       <div className="flex items-center gap-2">
-        {currentProvider?.icon && <currentProvider.icon className="size-5" />}
         <span>{currentModel?.name || "Select model"}</span>
       </div>
       <CaretDownIcon className="size-4 opacity-50" />
@@ -216,9 +208,6 @@ export function ModelSelector({
               ) : filteredModels.length > 0 ? (
                 filteredModels.map((model) => {
                   const isLocked = !model.accessible
-                  const provider = PROVIDERS.find(
-                    (provider) => provider.id === model.icon
-                  )
 
                   return (
                     <DropdownMenuItem
@@ -239,7 +228,6 @@ export function ModelSelector({
                       }}
                     >
                       <div className="flex items-center gap-2">
-                        {provider?.icon && <provider.icon className="size-4" />}
                         <div className="flex flex-col gap-0">
                           <span className="text-sm">{model.name}</span>
                         </div>

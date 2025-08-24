@@ -62,13 +62,13 @@ export function ModelsSettings() {
 
     return availableModels.reduce(
       (acc, model) => {
-        const iconKey = model.icon || "unknown"
+        const providerKey = model.providerId
 
-        if (!acc[iconKey]) {
-          acc[iconKey] = []
+        if (!acc[providerKey]) {
+          acc[providerKey] = []
         }
 
-        acc[iconKey].push(model)
+        acc[providerKey].push(model)
 
         return acc
       },
@@ -109,11 +109,6 @@ export function ModelsSettings() {
     updateFavoriteModels(newIds)
   }
 
-  const getProviderIcon = (model: ModelConfig) => {
-    const provider = PROVIDERS.find((p) => p.id === model.baseProviderId)
-    return provider?.icon
-  }
-
   return (
     <div className="space-y-6">
       <div>
@@ -136,24 +131,16 @@ export function ModelsSettings() {
               onReorder={handleReorder}
               className="space-y-2"
             >
-              {favoriteModels.map((model) => {
-                const ProviderIcon = getProviderIcon(model)
+              {favoriteModels.map((model) => (
+                <Reorder.Item key={model.id} value={model} className="group">
+                  <div className="border-border flex items-center gap-3 rounded-lg border bg-transparent p-3">
+                    {/* Drag Handle */}
+                    <div className="text-muted-foreground cursor-grab opacity-60 transition-opacity group-hover:opacity-100 active:cursor-grabbing">
+                      <DotsSixVerticalIcon className="size-4" />
+                    </div>
 
-                return (
-                  <Reorder.Item key={model.id} value={model} className="group">
-                    <div className="border-border flex items-center gap-3 rounded-lg border bg-transparent p-3">
-                      {/* Drag Handle */}
-                      <div className="text-muted-foreground cursor-grab opacity-60 transition-opacity group-hover:opacity-100 active:cursor-grabbing">
-                        <DotsSixVerticalIcon className="size-4" />
-                      </div>
-
-                      {/* Provider Icon */}
-                      {ProviderIcon && (
-                        <ProviderIcon className="size-5 shrink-0" />
-                      )}
-
-                      {/* Model Info */}
-                      <div className="min-w-0 flex-1">
+                    {/* Model Info */}
+                    <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="truncate font-medium">
                             {model.name}
@@ -183,10 +170,9 @@ export function ModelsSettings() {
                       >
                         <MinusIcon className="size-4" />
                       </button>
-                    </div>
-                  </Reorder.Item>
-                )
-              })}
+                  </div>
+                </Reorder.Item>
+              ))}
             </Reorder.Group>
           ) : (
             <motion.div
@@ -225,15 +211,13 @@ export function ModelsSettings() {
         {/* Models grouped by provider */}
         <div className="space-y-6 pb-6">
           {Object.entries(availableModelsByProvider).map(
-            ([iconKey, modelsGroup]) => {
-              const firstModel = modelsGroup[0]
-              const provider = PROVIDERS.find((p) => p.id === firstModel.icon)
+            ([providerId, modelsGroup]) => {
+              const provider = PROVIDERS.find((p) => p.id === providerId)
 
               return (
-                <div key={iconKey} className="space-y-3">
+                <div key={providerId} className="space-y-3">
                   <div className="flex items-center gap-2">
-                    {provider?.icon && <provider.icon className="size-5" />}
-                    <h4 className="font-medium">{provider?.name || iconKey}</h4>
+                    <h4 className="font-medium">{provider?.name || providerId}</h4>
                     <span className="text-muted-foreground text-sm">
                       ({modelsGroup.length} models)
                     </span>
