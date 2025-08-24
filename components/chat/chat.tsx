@@ -1,9 +1,9 @@
 "use client"
 
-import { ChatInput } from "@/app/components/chat-input/chat-input"
-import { Conversation } from "@/app/components/chat/conversation"
-import { useModel } from "@/app/components/chat/use-model"
-import { useChatDraft } from "@/app/hooks/use-chat-draft"
+import { ChatInput } from "@/components/chat-input/chat-input"
+import { Conversation } from "@/components/chat/conversation"
+import { useModel } from "@/components/chat/use-model"
+import { useChatDraft } from "@/lib/hooks/use-chat-draft"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 // Chat session routing removed
 import { cn } from "@/lib/utils"

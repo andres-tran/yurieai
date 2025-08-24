@@ -1,4 +1,4 @@
-import { useChatDraft } from "@/app/hooks/use-chat-draft"
+import { useChatDraft } from "@/lib/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
 // Auth removed
 import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
