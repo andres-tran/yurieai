@@ -35,7 +35,7 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-5",
+        model: "gpt-4.1",
         input: prompt,
         tools: [{ type: "image_generation" }],
       }),
