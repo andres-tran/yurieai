@@ -51,8 +51,6 @@ OPENAI_API_KEY=your_openai_api_key
 - `gpt-5-mini` — balanced quality/speed
 - `gpt-5-nano` — fastest and cheapest
 
-These GPT-5 models also support image generation via the OpenAI Responses API using the `image_generation` tool.
-
 ## Production Deployment
 
 ### Deploy to Vercel
