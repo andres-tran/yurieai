@@ -6,7 +6,6 @@ import { useModel } from "@/app/components/chat/use-model"
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 // Chat session routing removed
-import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
@@ -42,9 +41,6 @@ export function Chat() {
     chatId,
   })
 
-  const isAuthenticated = false
-  const systemPrompt = SYSTEM_PROMPT_DEFAULT
-
   // New state for quoted text
   const [quotedText, setQuotedText] = useState<{
     text: string
@@ -64,12 +60,10 @@ export function Chat() {
     input,
     status,
     stop,
-    hasSentFirstMessageRef,
     isSubmitting,
     enableSearch,
     setEnableSearch,
     submit,
-    handleSuggestion,
     handleReload,
     handleInputChange,
     setMessages,
@@ -115,14 +109,12 @@ export function Chat() {
   const chatInputProps = useMemo(
     () => ({
       value: input,
-      onSuggestion: handleSuggestion,
       onValueChange: handleInputChange,
       onSend: submit,
       isSubmitting,
       files,
       onFileUpload: handleFileUpload,
       onFileRemove: handleFileRemove,
-      hasSuggestions: messages.length === 0,
       onSelectModel: handleModelChange,
       selectedModel,
       stop,
@@ -133,18 +125,14 @@ export function Chat() {
     }),
     [
       input,
-      handleSuggestion,
       handleInputChange,
       submit,
       isSubmitting,
       files,
       handleFileUpload,
       handleFileRemove,
-      chatId,
-      messages.length,
       handleModelChange,
       selectedModel,
-      isAuthenticated,
       stop,
       status,
       setEnableSearch,

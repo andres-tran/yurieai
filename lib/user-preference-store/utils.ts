@@ -1,6 +1,5 @@
 export type UserPreferences = {
   layout: "fullscreen"
-  promptSuggestions: boolean
   showToolInvocations: boolean
   showConversationPreviews: boolean
   hiddenModels: string[]
@@ -8,17 +7,22 @@ export type UserPreferences = {
 
 export const defaultPreferences: UserPreferences = {
   layout: "fullscreen",
-  promptSuggestions: true,
   showToolInvocations: true,
   showConversationPreviews: true,
   hiddenModels: [],
 }
 
+type ApiPreferences = {
+  layout?: string
+  show_tool_invocations?: boolean
+  show_conversation_previews?: boolean
+  hidden_models?: string[]
+}
+
 // Helper functions to convert between API format (snake_case) and frontend format (camelCase)
-export function convertFromApiFormat(apiData: any): UserPreferences {
+export function convertFromApiFormat(apiData: ApiPreferences): UserPreferences {
   return {
     layout: "fullscreen",
-    promptSuggestions: true,
     showToolInvocations: apiData.show_tool_invocations ?? true,
     showConversationPreviews: apiData.show_conversation_previews ?? true,
     hiddenModels: apiData.hidden_models || [],
@@ -26,9 +30,8 @@ export function convertFromApiFormat(apiData: any): UserPreferences {
 }
 
 export function convertToApiFormat(preferences: Partial<UserPreferences>) {
-  const apiData: any = {}
+  const apiData: ApiPreferences = {}
   if (preferences.layout !== undefined) apiData.layout = "fullscreen"
-  // promptSuggestions always enabled; don't persist
   if (preferences.showToolInvocations !== undefined)
     apiData.show_tool_invocations = preferences.showToolInvocations
   if (preferences.showConversationPreviews !== undefined)
