@@ -20,13 +20,13 @@ export function ModelVisibilitySettings() {
 
   const modelsByProvider = filteredModels.reduce(
     (acc, model) => {
-      const iconKey = model.icon || "unknown"
+      const providerKey = model.providerId
 
-      if (!acc[iconKey]) {
-        acc[iconKey] = []
+      if (!acc[providerKey]) {
+        acc[providerKey] = []
       }
 
-      acc[iconKey].push(model)
+      acc[providerKey].push(model)
 
       return acc
     },
@@ -109,17 +109,15 @@ export function ModelVisibilitySettings() {
         />
       </div>
 
-      {/* Models grouped by icon/type */}
+      {/* Models grouped by provider */}
       <div className="space-y-6 pb-6">
-        {Object.entries(modelsByProvider).map(([iconKey, modelsGroup]) => {
-          const firstModel = modelsGroup[0]
-          const provider = PROVIDERS.find((p) => p.id === firstModel.icon)
+        {Object.entries(modelsByProvider).map(([providerId, modelsGroup]) => {
+          const provider = PROVIDERS.find((p) => p.id === providerId)
 
           return (
-            <div key={iconKey} className="space-y-3">
+            <div key={providerId} className="space-y-3">
               <div className="flex items-center gap-2">
-                {provider?.icon && <provider.icon className="size-5" />}
-                <h4 className="font-medium">{provider?.name || iconKey}</h4>
+                <h4 className="font-medium">{provider?.name || providerId}</h4>
                 <span className="text-muted-foreground text-sm">
                   ({modelsGroup.length} models)
                 </span>
