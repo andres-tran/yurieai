@@ -2,7 +2,7 @@ import { Markdown } from "@/components/prompt-kit/markdown"
 import { cn } from "@/lib/utils"
 import { CaretDownIcon } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 type ReasoningProps = {
   reasoning: string
@@ -19,10 +19,15 @@ export function Reasoning({ reasoning, isStreaming }: ReasoningProps) {
   const [wasStreaming, setWasStreaming] = useState(isStreaming ?? false)
   const [isExpanded, setIsExpanded] = useState(() => isStreaming ?? true)
 
-  if (wasStreaming && isStreaming === false) {
-    setWasStreaming(false)
-    setIsExpanded(false)
-  }
+  useEffect(() => {
+    if (isStreaming) {
+      setWasStreaming(true)
+      setIsExpanded(true)
+    } else if (wasStreaming) {
+      setWasStreaming(false)
+      setIsExpanded(false)
+    }
+  }, [isStreaming, wasStreaming])
 
   return (
     <div>
