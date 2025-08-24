@@ -9,6 +9,7 @@ import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
 import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
+import Image from "next/image"
 import { useCallback, useRef } from "react"
 import { getSources } from "./get-sources"
 import { QuoteButton } from "./quote-button"
@@ -51,6 +52,8 @@ export function MessageAssistant({
   )
   const contentNullOrEmpty = children === null || children === ""
   const isLastStreaming = status === "streaming" && isLast
+  const imageParts =
+    (parts as any)?.filter((part: any) => part.type === "image") ?? []
   const searchImageResults =
     parts
       ?.filter(
@@ -107,6 +110,25 @@ export function MessageAssistant({
         {searchImageResults.length > 0 && (
           <SearchImages results={searchImageResults} />
         )}
+
+        {imageParts.map((part: any, index: number) => {
+          const src =
+            typeof part.image === "string"
+              ? part.image.startsWith("data:")
+                ? part.image
+                : `data:${part.mimeType || "image/png"};base64,${part.image}`
+              : (part.image as { url: string }).url
+          return (
+            <Image
+              key={index}
+              src={src}
+              alt="Generated image"
+              width={512}
+              height={512}
+              className="rounded-xl"
+            />
+          )
+        })}
 
         {contentNullOrEmpty ? (
           status === "streaming" && (
