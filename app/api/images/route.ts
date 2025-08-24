@@ -35,9 +35,9 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-5",
+        model: "gpt-4.1",
         input: prompt,
-        modalities: ["text", "image"],
+        tools: [{ type: "image_generation" }],
       }),
     });
 
@@ -65,10 +65,10 @@ export async function POST(req: Request) {
     }
 
     const data = await response.json();
-    const image = data.output
-      ?.find((o: { type: string }) => o.type === "message")
-      ?.content?.find((c: { type: string }) => c.type === "output_image")
-      ?.image_base64;
+    const images = data.output
+      ?.filter((o: { type: string }) => o.type === "image_generation_call")
+      ?.map((o: { result: string }) => o.result);
+    const image = images?.[0];
     if (!image) {
       return createErrorResponse({
         message: "No image returned from OpenAI",
