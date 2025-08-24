@@ -62,7 +62,15 @@ function PromptSuggestion({
   const trimmedHighlight = highlight.trim()
   const contentLower = content.toLowerCase()
   const highlightLower = trimmedHighlight.toLowerCase()
-  const shouldHighlight = contentLower.includes(highlightLower)
+  const index = contentLower.indexOf(highlightLower)
+  const hasMatch = index !== -1
+  const before = hasMatch ? content.substring(0, index) : ""
+  const match = hasMatch
+    ? content.substring(index, index + highlightLower.length)
+    : ""
+  const after = hasMatch
+    ? content.substring(index + highlightLower.length)
+    : ""
 
   return (
     <Button
@@ -76,42 +84,22 @@ function PromptSuggestion({
       title={content || undefined}
       {...props}
     >
-      {shouldHighlight ? (
-        (() => {
-          const index = contentLower.indexOf(highlightLower)
-          if (index === -1)
-            return (
-              <span className="text-muted-foreground group-hover:!text-accent-foreground whitespace-pre-wrap">
-                {content}
-              </span>
-            )
-
-          const actualHighlightedText = content.substring(
-            index,
-            index + highlightLower.length
-          )
-
-          const before = content.substring(0, index)
-          const after = content.substring(index + actualHighlightedText.length)
-
-          return (
-            <>
-              {before && (
-                <span className="text-muted-foreground group-hover:!text-accent-foreground whitespace-pre-wrap">
-                  {before}
-                </span>
-              )}
-              <span className="text-primary group-hover:!text-accent-foreground font-medium whitespace-pre-wrap">
-                {actualHighlightedText}
-              </span>
-              {after && (
-                <span className="text-muted-foreground group-hover:!text-accent-foreground whitespace-pre-wrap">
-                  {after}
-                </span>
-              )}
-            </>
-          )
-        })()
+      {hasMatch ? (
+        <>
+          {before && (
+            <span className="text-muted-foreground group-hover:!text-accent-foreground whitespace-pre-wrap">
+              {before}
+            </span>
+          )}
+          <span className="text-primary font-medium group-hover:!text-accent-foreground whitespace-pre-wrap">
+            {match}
+          </span>
+          {after && (
+            <span className="text-muted-foreground group-hover:!text-accent-foreground whitespace-pre-wrap">
+              {after}
+            </span>
+          )}
+        </>
       ) : (
         <span className="text-muted-foreground group-hover:!text-accent-foreground whitespace-pre-wrap">
           {content}
@@ -122,3 +110,4 @@ function PromptSuggestion({
 }
 
 export { PromptSuggestion }
+
