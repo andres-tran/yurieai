@@ -122,7 +122,11 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased leading-relaxed tracking-normal text-pretty;
+  }
+
+  p {
+    @apply leading-relaxed text-pretty;
   }
 }
 
