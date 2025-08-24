@@ -51,19 +51,18 @@ export async function POST(req: Request) {
       )
     }
 
-    const tools = {
-      image_generation: { type: "image_generation" },
-      ...(enableSearch && {
-        web_search_preview: openai.tools.webSearchPreview({
-          searchContextSize: "high",
-          userLocation: {
-            type: "approximate",
-            country: "US",
-            timezone: "America/Chicago",
-          },
-        }),
-      }),
-    }
+    const tools = enableSearch
+      ? {
+          web_search_preview: openai.tools.webSearchPreview({
+            searchContextSize: "high",
+            userLocation: {
+              type: "approximate",
+              country: "US",
+              timezone: "America/Chicago",
+            },
+          }),
+        }
+      : undefined
 
       const result = streamText({
         model:
@@ -77,7 +76,7 @@ export async function POST(req: Request) {
       system: effectiveSystemPrompt,
       messages: messages,
       temperature: 1,
-      tools,
+      ...(tools && { tools }),
       reasoning: { effort: "high" },
       maxSteps: 10,
       onError: (err: unknown) => {
