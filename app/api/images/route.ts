@@ -41,14 +41,32 @@ export async function POST(req: Request) {
     });
 
     if (!response.ok) {
-      const err = await response.text();
-      throw new Error(err);
+      // OpenAI occasionally returns HTML error pages (e.g. from nginx) which are not
+      // useful for clients. Attempt to parse a JSON error message and fall back to
+      // a generic one when parsing fails.
+      let message: string;
+      try {
+        const errText = await response.text();
+        const parsed = JSON.parse(errText);
+        message =
+          parsed.error?.message || parsed.message || "Request to OpenAI failed";
+      } catch {
+        message = "Request to OpenAI failed";
+      }
+
+      return createErrorResponse({
+        message,
+        statusCode: response.status,
+      });
     }
 
     const data = await response.json();
     const image = data.data?.[0]?.b64_json;
     if (!image) {
-      throw new Error("No image returned from OpenAI");
+      return createErrorResponse({
+        message: "No image returned from OpenAI",
+        statusCode: 500,
+      });
     }
 
     return new Response(JSON.stringify({ image }), {
