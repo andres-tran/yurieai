@@ -51,28 +51,33 @@ export async function POST(req: Request) {
       )
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = streamText({
-      model:
-        // Prefer server-side construction to avoid leaking provider impl to client bundles
-        (modelConfig as any).apiSdk
-          ? (modelConfig as any).apiSdk(apiKey, { enableSearch })
-          : openproviders(model as any, undefined, apiKey),
+    const tools = {
+      image_generation: { type: "image_generation" },
+      ...(enableSearch && {
+        web_search_preview: openai.tools.webSearchPreview({
+          searchContextSize: "high",
+          userLocation: {
+            type: "approximate",
+            country: "US",
+            timezone: "America/Chicago",
+          },
+        }),
+      }),
+    }
+
+      const result = streamText({
+        model:
+          // Prefer server-side construction to avoid leaking provider impl to client bundles
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (modelConfig as any).apiSdk
+            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (modelConfig as any).apiSdk(apiKey, { enableSearch })
+            : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              openproviders(model as any, undefined, apiKey),
       system: effectiveSystemPrompt,
       messages: messages,
       temperature: 1,
-      tools: enableSearch
-        ? {
-            web_search_preview: openai.tools.webSearchPreview({
-              searchContextSize: "high",
-              userLocation: {
-                type: "approximate",
-                country: "US",
-                timezone: "America/Chicago",
-              },
-            }),
-          }
-        : undefined,
+      tools,
       reasoning: { effort: "high" },
       maxSteps: 10,
       onError: (err: unknown) => {
@@ -81,7 +86,8 @@ export async function POST(req: Request) {
       },
 
       onFinish: async () => {},
-    } as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any)
 
     return result.toDataStreamResponse({
       sendReasoning: true,
