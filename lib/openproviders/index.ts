@@ -17,11 +17,6 @@ export function openproviders<T extends SupportedModel>(
   settings?: OpenProvidersOptions<T>,
   apiKey?: string
 ): LanguageModelV1 {
-  if (modelId === ("gpt-image-1" as T)) {
-    throw new Error(
-      "Model gpt-image-1 must be used with the Images API instead of the Responses API"
-    )
-  }
   if (apiKey) {
     const openaiProvider = createOpenAI({
       apiKey,
