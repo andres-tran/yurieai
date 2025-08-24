@@ -1,3 +1,4 @@
+import { Loader } from "@/components/prompt-kit/loader"
 import {
   Message,
   MessageAction,
@@ -9,7 +10,6 @@ import { cn } from "@/lib/utils"
 import type { Message as MessageAISDK } from "@ai-sdk/react"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
 import { useCallback, useRef } from "react"
-import { Loader } from "@/components/prompt-kit/loader"
 import { getSources } from "./get-sources"
 import { QuoteButton } from "./quote-button"
 import { Reasoning } from "./reasoning"
@@ -50,8 +50,10 @@ export function MessageAssistant({
   const toolInvocationParts = parts?.filter(
     (part) => part.type === "tool-invocation"
   )
-  const reasoningParts = parts?.find((part) => part.type === "reasoning")
-  const reasoningText = (reasoningParts as any)?.reasoning ?? (reasoningParts as any)?.text
+  const reasoningPart = parts?.find((part) => part.type === "reasoning") as
+    | { reasoning?: string; text?: string }
+    | undefined
+  const reasoningText = reasoningPart?.reasoning ?? reasoningPart?.text ?? ""
   const contentNullOrEmpty = children === null || children === ""
   const isLastStreaming = status === "streaming" && isLast
   const searchImageResults =
@@ -101,7 +103,7 @@ export function MessageAssistant({
         )}
         {...(isQuoteEnabled && { "data-message-id": messageId })}
       >
-        {reasoningText && (
+        {reasoningPart && (
           <Reasoning
             reasoning={reasoningText}
             isStreaming={status === "streaming"}

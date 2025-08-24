@@ -1,8 +1,10 @@
 "use client"
+
 import { useChatDraft } from "@/app/hooks/use-chat-draft"
 import { useMessages } from "@/lib/chat-store/messages/provider"
 import Link from "next/link"
 import { DialogPublish } from "./dialog-publish"
+
 export function Header() {
   const user = null
   const { resetMessages } = useMessages()
@@ -23,13 +25,13 @@ export function Header() {
                   resetMessages()
                   clearDraft()
                   if (typeof window !== "undefined") {
+                    window.dispatchEvent(new Event("stop-chat"))
                     window.dispatchEvent(new Event("clear-chat"))
                   }
                 }}
               >
                 <img src="/favicon.ico" alt="Yurie" width={32} height={32} />
               </Link>
-              
             </div>
           </div>
           <div />

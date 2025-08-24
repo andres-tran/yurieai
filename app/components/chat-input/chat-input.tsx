@@ -178,7 +178,10 @@ export function ChatInput({
           />
           <PromptInputActions className="mt-3 w-full justify-between p-2">
             <div className="flex flex-wrap gap-2">
-              <ButtonFileUpload onFileUpload={onFileUpload} model={selectedModel} />
+              <ButtonFileUpload
+                onFileUpload={onFileUpload}
+                model={selectedModel}
+              />
               {hasSearchSupport ? (
                 <ButtonSearch
                   isSelected={enableSearch}
@@ -197,7 +200,10 @@ export function ChatInput({
               <Button
                 size="sm"
                 className="size-9 rounded-full transition-all duration-300 ease-out"
-                disabled={!value || isSubmitting || isOnlyWhitespace(value)}
+                disabled={
+                  status !== "streaming" &&
+                  (!value || isSubmitting || isOnlyWhitespace(value))
+                }
                 type="button"
                 onClick={handleSend}
                 aria-label={status === "streaming" ? "Stop" : "Send message"}
