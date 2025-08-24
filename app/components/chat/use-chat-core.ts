@@ -123,6 +123,21 @@ export function useChatCore({
     }
   }, [setMessages, setInput, setFiles, clearDraft])
 
+  // Stop chat streaming when triggered globally
+  useEffect(() => {
+    const handleStop = () => {
+      stop()
+    }
+    if (typeof window !== "undefined") {
+      window.addEventListener("stop-chat", handleStop)
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("stop-chat", handleStop)
+      }
+    }
+  }, [stop])
+
   // Reset messages when navigating from a chat to home
   useEffect(() => {
     if (
@@ -163,12 +178,12 @@ export function useChatCore({
     try {
       const currentChatId =
         chatId ||
-        (localStorage.getItem("guestChatId") ||
-          (() => {
-            const newId = crypto.randomUUID()
-            localStorage.setItem("guestChatId", newId)
-            return newId
-          })())
+        localStorage.getItem("guestChatId") ||
+        (() => {
+          const newId = crypto.randomUUID()
+          localStorage.setItem("guestChatId", newId)
+          return newId
+        })()
 
       if (input.length > MESSAGE_MAX_LENGTH) {
         toast({
@@ -260,12 +275,12 @@ export function useChatCore({
       try {
         const currentChatId =
           chatId ||
-          (localStorage.getItem("guestChatId") ||
-            (() => {
-              const newId = crypto.randomUUID()
-              localStorage.setItem("guestChatId", newId)
-              return newId
-            })())
+          localStorage.getItem("guestChatId") ||
+          (() => {
+            const newId = crypto.randomUUID()
+            localStorage.setItem("guestChatId", newId)
+            return newId
+          })()
 
         if (!currentChatId) {
           setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
@@ -310,12 +325,12 @@ export function useChatCore({
   const handleReload = useCallback(async () => {
     const currentChatId =
       chatId ||
-      (localStorage.getItem("guestChatId") ||
-        (() => {
-          const newId = crypto.randomUUID()
-          localStorage.setItem("guestChatId", newId)
-          return newId
-        })())
+      localStorage.getItem("guestChatId") ||
+      (() => {
+        const newId = crypto.randomUUID()
+        localStorage.setItem("guestChatId", newId)
+        return newId
+      })()
 
     if (!currentChatId) {
       return
