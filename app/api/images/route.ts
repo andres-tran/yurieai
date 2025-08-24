@@ -28,16 +28,16 @@ export async function POST(req: Request) {
       );
     }
 
-    const response = await fetch("https://api.openai.com/v1/images/generations", {
+    const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-image-1",
-        prompt,
-        response_format: "b64_json",
+        model: "gpt-4.1-mini",
+        input: prompt,
+        tools: [{ type: "image_generation" }],
       }),
     });
 
@@ -65,7 +65,9 @@ export async function POST(req: Request) {
     }
 
     const data = await response.json();
-    const image = data.data?.[0]?.b64_json;
+    const image = data.output
+      ?.find((o: { type: string }) => o.type === "image_generation_call")
+      ?.result;
     if (!image) {
       return createErrorResponse({
         message: "No image returned from OpenAI",

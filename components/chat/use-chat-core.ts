@@ -175,7 +175,7 @@ export function useChatCore({
     const submittedFiles = [...files]
     setFiles([])
 
-    if (selectedModel === "gpt-image-1") {
+    if (selectedModel === "image") {
       try {
         cacheAndAddMessage(optimisticMessage)
         clearDraft()
@@ -301,7 +301,7 @@ export function useChatCore({
 
   // Handle reload
   const handleReload = useCallback(async () => {
-    if (selectedModel === "gpt-image-1") {
+    if (selectedModel === "image") {
       return
     }
 
