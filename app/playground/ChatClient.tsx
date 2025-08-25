@@ -1,5 +1,7 @@
 "use client"
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ModelSelector } from "@/components/common/model-selector/base"
 import { Marked } from "marked"
