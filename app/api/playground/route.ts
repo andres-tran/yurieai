@@ -85,19 +85,50 @@ export async function POST(request: Request) {
 
     if (wantsImage) {
       try {
-        const img = await client.images.generate({
+        const imgStream = (await client.images.generate({
           model: "gpt-image-1",
-          prompt: lastUserMessage || "Generate an image based on the conversation context",
+          prompt:
+            lastUserMessage || "Generate an image based on the conversation context",
           size: "1024x1024",
+          stream: true,
+          partial_images: 2,
+        } as unknown) as unknown) as AsyncIterable<{
+          type?: string
+          b64_json?: string
+        }>
+
+        const encoder = new TextEncoder()
+        const readable = new ReadableStream<Uint8Array>({
+          async start(controller) {
+            controller.enqueue(encoder.encode("Here is your image.\n"))
+            try {
+              for await (const event of imgStream) {
+                if (
+                  event.type === "image_generation.partial_image" ||
+                  event.type === "image_generation.image"
+                ) {
+                  const base64 = event.b64_json
+                  if (base64) {
+                    controller.enqueue(
+                      encoder.encode(
+                        `<image:data:image/png;base64,${base64}>\n`
+                      )
+                    )
+                  }
+                }
+              }
+            } catch (error) {
+              const message = error instanceof Error ? error.message : "Unknown error"
+              controller.enqueue(
+                encoder.encode(`There was an error generating the image: ${message}`)
+              )
+            } finally {
+              controller.close()
+            }
+          },
         })
-        const b64 = (img as { data?: Array<{ b64_json?: string }> })?.data?.[0]?.b64_json
-        if (!b64) {
-          return new Response("Sorry, no image was returned.", {
-            headers: { "Content-Type": "text/plain; charset=utf-8" },
-          })
-        }
-        const body = `Here is your image.\n<image:data:image/png;base64,${b64}>\n`
-        return new Response(body, {
+
+        return new Response(readable, {
           headers: {
             "Content-Type": "text/plain; charset=utf-8",
             "Cache-Control": "no-cache",
@@ -118,8 +149,11 @@ export async function POST(request: Request) {
       reasoning: { effort: "high" },
       instructions: "You are Yurie, a creative and helpful AI assistant.",
       input: prompt,
-      // Cast for SDK compatibility: some versions don't include 'image_generation' in Tool union
-      tools: [{ type: "image_generation" } as { type: string }],
+      // Cast for SDK compatibility: some versions don't include these in Tool union
+      tools: [
+        { type: "web_search_preview" } as { type: string },
+        { type: "image_generation" } as { type: string },
+      ],
     })) as AsyncIterable<{ type: string; delta?: string }> & {
       final?: () => Promise<{ output?: Array<{ type?: string; result?: unknown }> }>
     }
@@ -139,8 +173,8 @@ export async function POST(request: Request) {
         } finally {
           // Try to finalize, then emit any generated images at the end
           try {
-            const hasFinal = typeof stream.final === "function"
-            const finalResponse = hasFinal ? await stream.final() : undefined
+              const hasFinal = typeof stream.final === "function"
+              const finalResponse = hasFinal ? await stream.final!() : undefined
             const outputs = (finalResponse && finalResponse.output) || []
             const imageCalls = Array.isArray(outputs)
               ? (outputs as Array<{ type?: string; result?: unknown }>).filter(
