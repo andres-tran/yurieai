@@ -1,12 +1,10 @@
 import { useChatDraft } from "@/lib/hooks/use-chat-draft"
 import { toast } from "@/components/ui/toast"
-// Auth removed
 import { MESSAGE_MAX_LENGTH, SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { Attachment } from "@/lib/file-handling"
 import { API_ROUTE_CHAT } from "@/lib/routes"
 import type { UserProfile } from "@/lib/user/types"
-import type { Message } from "@ai-sdk/react"
-import { useChat } from "@ai-sdk/react"
+import type { Message } from "@/lib/chat/types"
 import { useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
@@ -44,12 +42,15 @@ export function useChatCore({
   selectedModel,
   clearDraft,
 }: UseChatCoreProps) {
-  // State management
+  const [messages, setMessages] = useState<Message[]>(initialMessages)
+  const [input, setInput] = useState(draftValue)
+  const [status, setStatus] = useState<"ready" | "submitted" | "error">(
+    "ready"
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasDialogAuth, setHasDialogAuth] = useState(false)
   const [enableSearch, setEnableSearch] = useState(true)
 
-  // Refs and derived state
   const hasSentFirstMessageRef = useRef(false)
   const prevChatIdRef = useRef<string | null>(chatId)
   const isAuthenticated = false
@@ -58,54 +59,17 @@ export function useChatCore({
     [user?.system_prompt]
   )
 
-  // Search params handling
   const searchParams = useSearchParams()
   const prompt = searchParams.get("prompt")
 
-  // Handle errors directly in onError callback
-  const handleError = useCallback((error: Error) => {
-    console.error("Chat error:", error)
-    console.error("Error message:", error.message)
-    let errorMsg = error.message || "Something went wrong."
-
-    if (errorMsg === "An error occurred" || errorMsg === "fetch failed") {
-      errorMsg = "Something went wrong. Please try again."
-    }
-
-    toast({
-      title: errorMsg,
-      status: "error",
-    })
-  }, [])
-
-  // Initialize useChat
-  const {
-    messages,
-    input,
-    handleSubmit,
-    status,
-    error,
-    reload,
-    stop,
-    setMessages,
-    setInput,
-    append,
-  } = useChat({
-    api: API_ROUTE_CHAT,
-    initialMessages,
-    initialInput: draftValue,
-    onFinish: cacheAndAddMessage,
-    onError: handleError,
-  })
-
-  // Handle search params on mount
   useEffect(() => {
     if (prompt && typeof window !== "undefined") {
       requestAnimationFrame(() => setInput(prompt))
     }
-  }, [prompt, setInput])
+  }, [prompt])
 
-  // Clear chat when a global clear event is dispatched (e.g., clicking the logo)
+  const { setDraftValue } = useChatDraft(chatId)
+
   useEffect(() => {
     const handleClear = () => {
       setMessages([])
@@ -123,22 +87,6 @@ export function useChatCore({
     }
   }, [setMessages, setInput, setFiles, clearDraft])
 
-  // Stop chat streaming when triggered globally
-  useEffect(() => {
-    const handleStop = () => {
-      stop()
-    }
-    if (typeof window !== "undefined") {
-      window.addEventListener("stop-chat", handleStop)
-    }
-    return () => {
-      if (typeof window !== "undefined") {
-        window.removeEventListener("stop-chat", handleStop)
-      }
-    }
-  }, [stop])
-
-  // Reset messages when navigating from a chat to home
   useEffect(() => {
     if (
       prevChatIdRef.current !== null &&
@@ -148,155 +96,148 @@ export function useChatCore({
       setMessages([])
     }
     prevChatIdRef.current = chatId
-  }, [chatId, messages.length, setMessages])
+  }, [chatId, messages.length])
 
-  // Submit action
-  const submit = useCallback(async () => {
-    setIsSubmitting(true)
+  const submit = useCallback(
+    async (overrideInput?: string) => {
+      setIsSubmitting(true)
+      setStatus("submitted")
 
-    // No user identity required
+      const messageContent = overrideInput ?? input
+      const optimisticId = `optimistic-${Date.now().toString()}`
+      const optimisticAttachments =
+        files.length > 0 ? createOptimisticAttachments(files) : []
 
-    const optimisticId = `optimistic-${Date.now().toString()}`
-    const optimisticAttachments =
-      files.length > 0 ? createOptimisticAttachments(files) : []
-
-    const optimisticMessage = {
-      id: optimisticId,
-      content: input,
-      role: "user" as const,
-      createdAt: new Date(),
-      experimental_attachments:
-        optimisticAttachments.length > 0 ? optimisticAttachments : undefined,
-    }
-
-    setMessages((prev) => [...prev, optimisticMessage])
-    setInput("")
-
-    const submittedFiles = [...files]
-    setFiles([])
-
-
-    try {
-      const currentChatId =
-        chatId ||
-        localStorage.getItem("guestChatId") ||
-        (() => {
-          const newId = crypto.randomUUID()
-          localStorage.setItem("guestChatId", newId)
-          return newId
-        })()
-
-      if (input.length > MESSAGE_MAX_LENGTH) {
-        toast({
-          title: `The message you submitted was too long, please submit something shorter. (Max ${MESSAGE_MAX_LENGTH} characters)`,
-          status: "error",
-        })
-        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
-        return
+      const optimisticMessage: Message = {
+        id: optimisticId,
+        content: messageContent,
+        role: "user",
+        experimental_attachments:
+          optimisticAttachments.length > 0 ? optimisticAttachments : undefined,
       }
 
-      let attachments: Attachment[] | null = []
-      if (submittedFiles.length > 0) {
-        attachments = await handleFileUploads("local", currentChatId)
-        if (attachments === null) {
-          setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+      setMessages((prev) => [...prev, optimisticMessage])
+      setInput("")
+
+      const submittedFiles = [...files]
+      setFiles([])
+
+      try {
+        const currentChatId =
+          chatId ||
+          localStorage.getItem("guestChatId") ||
+          (() => {
+            const newId = crypto.randomUUID()
+            localStorage.setItem("guestChatId", newId)
+            return newId
+          })()
+
+        if (messageContent.length > MESSAGE_MAX_LENGTH) {
+          toast({
+            title: `The message you submitted was too long, please submit something shorter. (Max ${MESSAGE_MAX_LENGTH} characters)`,
+            status: "error",
+          })
+          setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
           cleanupOptimisticAttachments(
             optimisticMessage.experimental_attachments
           )
+          setStatus("error")
           return
         }
-      }
 
-      const options = {
-        body: {
+        let attachments: Attachment[] | null = []
+        if (submittedFiles.length > 0) {
+          attachments = await handleFileUploads("local", currentChatId)
+          if (attachments === null) {
+            setMessages((prev) => prev.filter((m) => m.id !== optimisticId))
+            cleanupOptimisticAttachments(
+              optimisticMessage.experimental_attachments
+            )
+            setStatus("error")
+            return
+          }
+        }
+
+        const payload = {
           chatId: currentChatId,
           model: selectedModel,
           systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
           enableSearch,
-        },
-        experimental_attachments: attachments || undefined,
+          messages: [
+            ...messages.map((m) => ({ role: m.role, content: m.content })),
+            { role: "user", content: messageContent },
+          ],
+          attachments: attachments || undefined,
+        }
+
+        const res = await fetch(API_ROUTE_CHAT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+
+        if (!res.ok) {
+          throw new Error("Request failed")
+        }
+
+        const data = (await res.json()) as { content: string }
+        const assistantMessage: Message = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: data.content,
+        }
+
+        setMessages((prev) =>
+          prev
+            .filter((msg) => msg.id !== optimisticId)
+            .concat(optimisticMessage, assistantMessage)
+        )
+        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+        cacheAndAddMessage(optimisticMessage)
+        cacheAndAddMessage(assistantMessage)
+        clearDraft()
+        setStatus("ready")
+      } catch (err) {
+        console.error(err)
+        setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
+        cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
+        toast({ title: "Failed to send message", status: "error" })
+        setStatus("error")
+      } finally {
+        setIsSubmitting(false)
       }
+    },
+    [
+      files,
+      createOptimisticAttachments,
+      input,
+      setMessages,
+      setInput,
+      setFiles,
+      cleanupOptimisticAttachments,
+      handleFileUploads,
+      selectedModel,
+      systemPrompt,
+      enableSearch,
+      cacheAndAddMessage,
+      clearDraft,
+      messages,
+      chatId,
+    ]
+  )
 
-      append(
-        {
-          role: "user",
-          content: optimisticMessage.content,
-        },
-        options
-      )
-      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
-      cacheAndAddMessage(optimisticMessage)
-      clearDraft()
-    } catch {
-      setMessages((prev) => prev.filter((msg) => msg.id !== optimisticId))
-      cleanupOptimisticAttachments(optimisticMessage.experimental_attachments)
-      toast({ title: "Failed to send message", status: "error" })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }, [
-    user,
-    files,
-    createOptimisticAttachments,
-    input,
-    setMessages,
-    setInput,
-    setFiles,
-    cleanupOptimisticAttachments,
-    handleFileUploads,
-    selectedModel,
-    isAuthenticated,
-    systemPrompt,
-    enableSearch,
-    handleSubmit,
-    append,
-    cacheAndAddMessage,
-    clearDraft,
-    messages.length,
-    chatId,
-    setIsSubmitting,
-    handleError,
-  ])
-
-  // Handle reload
   const handleReload = useCallback(async () => {
-    const currentChatId =
-      chatId ||
-      localStorage.getItem("guestChatId") ||
-      (() => {
-        const newId = crypto.randomUUID()
-        localStorage.setItem("guestChatId", newId)
-        return newId
-      })()
+    const lastUser = [...messages].reverse().find((m) => m.role === "user")
+    if (!lastUser) return
+    // remove last assistant message if it's the last entry
+    setMessages((prev) =>
+      prev[prev.length - 1]?.role === "assistant"
+        ? prev.slice(0, -1)
+        : prev
+    )
+    await submit(lastUser.content)
+  }, [messages, submit])
 
-    if (!currentChatId) {
-      return
-    }
-
-    const options = {
-      body: {
-        chatId: currentChatId,
-        model: selectedModel,
-        systemPrompt: systemPrompt || SYSTEM_PROMPT_DEFAULT,
-        enableSearch,
-      },
-    }
-
-    reload(options)
-  }, [
-    user,
-    chatId,
-    selectedModel,
-    isAuthenticated,
-    systemPrompt,
-    enableSearch,
-    reload,
-  ])
-
-  // Handle input change - now with access to the real setInput function!
-  const { setDraftValue } = useChatDraft(chatId)
   const handleInputChange = useCallback(
     (value: string) => {
       setInput(value)
@@ -306,30 +247,21 @@ export function useChatCore({
   )
 
   return {
-    // Chat state
     messages,
     input,
-    handleSubmit,
     status,
-    error,
-    reload,
-    stop,
+    stop: () => {},
     setMessages,
     setInput,
-    append,
     isAuthenticated,
     systemPrompt,
     hasSentFirstMessageRef,
-
-    // Component state
     isSubmitting,
     setIsSubmitting,
     hasDialogAuth,
     setHasDialogAuth,
     enableSearch,
     setEnableSearch,
-
-    // Actions
     submit,
     handleReload,
     handleInputChange,

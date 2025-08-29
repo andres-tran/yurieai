@@ -1,6 +1,6 @@
-export const FREE_MODELS_IDS = ["gpt-5-nano"]
+export const FREE_MODELS_IDS = ["gpt-4o-mini"]
 
-export const MODEL_DEFAULT = "gpt-5-nano"
+export const MODEL_DEFAULT = "gpt-4o-mini"
 
 export const APP_NAME = "Yurie"
 export const APP_DOMAIN = "https://yurie.chat"

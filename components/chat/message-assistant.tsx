@@ -7,7 +7,7 @@ import {
 } from "@/components/prompt-kit/message"
 import { useUserPreferences } from "@/lib/user-preference-store/provider"
 import { cn } from "@/lib/utils"
-import type { Message as MessageAISDK } from "@ai-sdk/react"
+import type { Message as MessageAISDK } from "@/lib/chat/types"
 import { ArrowClockwise, Check, Copy } from "@phosphor-icons/react"
 import Image from "next/image"
 import { useCallback, useRef } from "react"
@@ -15,8 +15,9 @@ import { getSources } from "./get-sources"
 import { QuoteButton } from "./quote-button"
 import { SearchImages } from "./search-images"
 import { SourcesList } from "./sources-list"
-import { ToolInvocation } from "./tool-invocation"
+import { ToolInvocation, type ToolInvocationUIPart } from "./tool-invocation"
 import { useAssistantMessageSelection } from "./useAssistantMessageSelection"
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 type MessageAssistantProps = {
   children: string
@@ -47,9 +48,9 @@ export function MessageAssistant({
 }: MessageAssistantProps) {
   const { preferences } = useUserPreferences()
   const sources = getSources(parts)
-  const toolInvocationParts = parts?.filter(
-    (part) => part.type === "tool-invocation"
-  )
+  const toolInvocationParts = ((parts as any[])?.filter(
+    (part: any) => part.type === "tool-invocation"
+  ) ?? []) as ToolInvocationUIPart[]
   const contentNullOrEmpty = children === null || children === ""
   const isLastStreaming = status === "streaming" && isLast
   const imageParts =

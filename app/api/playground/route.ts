@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         ? promptRaw.slice(promptRaw.length - MAX_PROMPT_CHARS)
         : promptRaw
 
-    const selectedModel = typeof model === "string" && model.trim() ? model : "gpt-5"
+    const selectedModel = typeof model === "string" && model.trim() ? model : "gpt-4o-mini"
 
     // Heuristic: if the latest user message looks like an image request,
     // call the dedicated image generation endpoint for reliability.

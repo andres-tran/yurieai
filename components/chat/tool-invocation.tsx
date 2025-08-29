@@ -1,7 +1,18 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import type { ToolInvocationUIPart } from "@ai-sdk/ui-utils"
+export interface ToolInvocationUIPart {
+  toolInvocation: {
+    toolCallId: string
+    toolName: string
+    state: string
+    args?: Record<string, unknown>
+    result?: {
+      content?: Array<{ type: string; [key: string]: unknown }>
+      [key: string]: unknown
+    }
+  }
+}
 import {
   CaretDown,
   CheckCircle,
@@ -226,16 +237,16 @@ function SingleToolCard({
         result !== null &&
         "content" in result
       ) {
-        const textContent = result.content?.find(
-          (item: { type: string }) => item.type === "text"
-        )
-        if (!textContent?.text) return { parsedResult: null, parseError: null }
+          const textContent = (result.content as Array<{ type: string; text?: string }>)?.find(
+            (item) => item.type === "text"
+          )
+          if (!textContent?.text) return { parsedResult: null, parseError: null }
 
         try {
-          return {
-            parsedResult: JSON.parse(textContent.text),
-            parseError: null,
-          }
+            return {
+              parsedResult: JSON.parse(textContent.text as string),
+              parseError: null,
+            }
         } catch {
           return { parsedResult: textContent.text, parseError: null }
         }

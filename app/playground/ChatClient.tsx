@@ -14,7 +14,7 @@ export default function ChatClient() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [model, setModel] = useState<string>("gpt-5")
+  const [model, setModel] = useState<string>("gpt-4o-mini")
   const outputRef = useRef<HTMLDivElement>(null)
 
   const placeholder = useMemo(() => "Ask me anything...", [])

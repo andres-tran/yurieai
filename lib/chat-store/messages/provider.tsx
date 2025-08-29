@@ -1,18 +1,17 @@
 "use client"
 
-import { toast } from "@/components/ui/toast"
 // Chat session removed
-import type { Message as MessageAISDK } from "ai"
+import type { Message } from "@/lib/chat/types"
 import { createContext, useContext, useEffect, useState } from "react"
  
 
 interface MessagesContextType {
-  messages: MessageAISDK[]
+  messages: Message[]
   isLoading: boolean
-  setMessages: React.Dispatch<React.SetStateAction<MessageAISDK[]>>
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   refresh: () => Promise<void>
-  saveAllMessages: (messages: MessageAISDK[]) => Promise<void>
-  cacheAndAddMessage: (message: MessageAISDK) => Promise<void>
+  saveAllMessages: (messages: Message[]) => Promise<void>
+  cacheAndAddMessage: (message: Message) => Promise<void>
   resetMessages: () => Promise<void>
   deleteMessages: () => Promise<void>
 }
@@ -27,9 +26,8 @@ export function useMessages() {
 }
 
 export function MessagesProvider({ children }: { children: React.ReactNode }) {
-  const [messages, setMessages] = useState<MessageAISDK[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const chatId = null
 
   useEffect(() => {
     setMessages([])
@@ -44,11 +42,11 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     setMessages([])
   }
 
-  const cacheAndAddMessage = async (message: MessageAISDK) => {
+  const cacheAndAddMessage = async (message: Message) => {
     setMessages((prev) => [...prev, message])
   }
 
-  const saveAllMessages = async (newMessages: MessageAISDK[]) => {
+  const saveAllMessages = async (newMessages: Message[]) => {
     setMessages(newMessages)
   }
 
