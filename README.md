@@ -102,7 +102,7 @@ You can customize various aspects of Yurie by modifying the configuration files:
 - [prompt-kit](https://prompt-kit.com/) — AI components
 - [shadcn/ui](https://ui.shadcn.com) — core components
 - [motion-primitives](https://motion-primitives.com) — animated components
-- [vercel ai sdk](https://vercel.com/blog/introducing-the-vercel-ai-sdk) — model integration, AI features
+- [OpenAI SDK](https://github.com/openai/openai-node) — model integration, AI features
 
 ## Community and Support
 

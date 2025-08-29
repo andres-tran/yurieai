@@ -1,4 +1,4 @@
-import { Message as MessageType } from "@ai-sdk/react"
+import type { Message as MessageType } from "@/lib/chat/types"
 import React, { useState } from "react"
 import { MessageAssistant } from "./message-assistant"
 import { MessageUser } from "./message-user"

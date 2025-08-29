@@ -1,11 +1,12 @@
-import type { Message as MessageAISDK } from "@ai-sdk/react"
+import type { Message } from "@/lib/chat/types"
 
-export function getSources(parts: MessageAISDK["parts"]) {
-  const sources = parts
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function getSources(parts: Message["parts"]) {
+  const sources = (parts as any[])
     ?.filter(
-      (part) => part.type === "source" || part.type === "tool-invocation"
+      (part: any) => part.type === "source" || part.type === "tool-invocation"
     )
-    .map((part) => {
+    .map((part: any) => {
       if (part.type === "source") {
         return part.source
       }

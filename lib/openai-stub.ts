@@ -19,4 +19,12 @@ export default class OpenAI {
       return { data: [{ b64_json: "" }] }
     },
   }
+  chat = {
+    completions: {
+      create: async (_args: unknown): Promise<{ choices: Array<{ message: { content: string } }> }> => {
+        void _args
+        return { choices: [{ message: { content: "" } }] }
+      },
+    },
+  }
 }

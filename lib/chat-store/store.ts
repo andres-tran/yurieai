@@ -1,28 +1,28 @@
-import type { Message as MessageAISDK } from "ai"
+import type { Message } from "@/lib/chat/types"
 import { readFromIndexedDB, writeToIndexedDB } from "./persist"
-import type { Chat, Chats } from "./types"
+import type { Chats } from "./types"
 
 // Messages
-type ChatMessageEntry = { id: string; messages: MessageAISDK[] }
+type ChatMessageEntry = { id: string; messages: Message[] }
 
-export async function getMessages(chatId: string): Promise<MessageAISDK[]> {
+export async function getMessages(chatId: string): Promise<Message[]> {
   const entry = await readFromIndexedDB<ChatMessageEntry>("messages", chatId)
   if (!entry || Array.isArray(entry)) return []
   return (entry.messages || []).sort(
-    (a, b) => +new Date(a.createdAt || 0) - +new Date(b.createdAt || 0)
+    (a, b) => +(a.createdAt || 0) - +(b.createdAt || 0)
   )
 }
 
 export async function setMessages(
   chatId: string,
-  messages: MessageAISDK[]
+  messages: Message[]
 ): Promise<void> {
   await writeToIndexedDB("messages", { id: chatId, messages })
 }
 
 export async function addMessage(
   chatId: string,
-  message: MessageAISDK
+  message: Message
 ): Promise<void> {
   const current = await getMessages(chatId)
   const updated = [...current, message]

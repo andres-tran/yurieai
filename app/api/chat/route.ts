@@ -1,15 +1,13 @@
 import { SYSTEM_PROMPT_DEFAULT } from "@/lib/config"
 import { getAllModels } from "@/lib/models"
-import { openproviders } from "@/lib/openproviders"
-import { Message as MessageAISDK, streamText } from "ai"
-// usage tracking removed
-import { createErrorResponse, extractErrorMessage } from "./utils"
-import { openai } from "@ai-sdk/openai"
+import type { Message } from "@/lib/chat/types"
+import OpenAI from "openai"
+import { createErrorResponse } from "./utils"
 
 export const maxDuration = 60
 
 type ChatRequest = {
-  messages: MessageAISDK[]
+  messages: Message[]
   chatId: string
   model: string
   systemPrompt: string
@@ -18,7 +16,7 @@ type ChatRequest = {
 
 export async function POST(req: Request) {
   try {
-    const { messages, chatId, model, systemPrompt, enableSearch } =
+    const { messages, chatId, model, systemPrompt } =
       (await req.json()) as ChatRequest
 
     if (!messages || !chatId) {
@@ -27,8 +25,6 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-
-    // usage tracking removed
 
     const allModels = await getAllModels()
     const modelConfig = allModels.find((m) => m.id === model)
@@ -51,50 +47,20 @@ export async function POST(req: Request) {
       )
     }
 
-    const tools = enableSearch
-      ? {
-          web_search_preview: openai.tools.webSearchPreview({
-            searchContextSize: "high",
-            userLocation: {
-              type: "approximate",
-              country: "US",
-              timezone: "America/Chicago",
-            },
-          }),
-        }
-      : undefined
+    const client = new OpenAI({ apiKey })
 
-      const result = streamText({
-        model:
-          // Prefer server-side construction to avoid leaking provider impl to client bundles
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (modelConfig as any).apiSdk
-            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (modelConfig as any).apiSdk(apiKey, { enableSearch })
-            : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              openproviders(model as any, apiKey),
-      system: effectiveSystemPrompt,
-      messages: messages,
-      temperature: 1,
-      ...(tools && { tools }),
-      reasoning: { effort: "high" },
-      maxSteps: 10,
-      onError: (err: unknown) => {
-        console.error("Streaming error occurred:", err)
-        // Don't set streamError anymore - let the AI SDK handle it through the stream
-      },
+    const response = await client.chat.completions.create({
+      model,
+      messages: [
+        { role: "system", content: effectiveSystemPrompt },
+        ...messages.map((m) => ({ role: m.role, content: m.content })),
+      ],
+    })
 
-      onFinish: async () => {},
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+    const content = response.choices[0]?.message?.content || ""
 
-    return result.toDataStreamResponse({
-      sendReasoning: true,
-      sendSources: true,
-      getErrorMessage: (error: unknown) => {
-        console.error("Error forwarded to client:", error)
-        return extractErrorMessage(error)
-      },
+    return new Response(JSON.stringify({ content }), {
+      headers: { "Content-Type": "application/json" },
     })
   } catch (err: unknown) {
     console.error("Error in /api/chat:", err)
