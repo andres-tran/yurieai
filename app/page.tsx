@@ -130,6 +130,8 @@ function FileUpload({ onFilesAdded, children, multiple = true, accept, disabled 
     [multiple, onFilesAdded]
   )
 
+  const shouldStickBottom = messages.length > 0
+
   useEffect(() => {
     const handleDrag = (e: DragEvent) => {
       e.preventDefault()
@@ -550,6 +552,7 @@ export default function Home() {
   const abortRef = useRef<AbortController | null>(null)
   const inputContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [inputHeight, setInputHeight] = useState<number>(134)
 
   const appendMessage = useCallback((msg: Omit<ChatMessage, "id">) => {
     const id = `${Date.now()}_${Math.random().toString(36).slice(2)}`
@@ -778,18 +781,53 @@ export default function Home() {
     abortRef.current?.abort()
   }, [])
 
-  // Removed ResizeObserver-driven padding logic; we'll use a sticky footer instead of fixed positioning
+  useEffect(() => {
+    const el = inputContainerRef.current
+    if (!el || typeof ResizeObserver === "undefined") return
+
+    const measure = () => {
+      // Use the full rendered height so padding/safe-area on mobile is included
+      const h = Math.ceil(el.getBoundingClientRect().height)
+      if (h !== inputHeight) setInputHeight(h)
+    }
+
+    const ro = new ResizeObserver(() => {
+      measure()
+    })
+    ro.observe(el)
+
+    // Initial measurement and on viewport changes (rotation/resizes)
+    measure()
+    window.addEventListener("resize", measure)
+    window.addEventListener("orientationchange", measure)
+    const vv = typeof window !== "undefined" ? (window as any).visualViewport : undefined
+    if (vv && vv.addEventListener) {
+      vv.addEventListener("resize", measure)
+      vv.addEventListener("scroll", measure)
+    }
+
+    return () => {
+      ro.disconnect()
+      window.removeEventListener("resize", measure)
+      window.removeEventListener("orientationchange", measure)
+      if (vv && vv.removeEventListener) {
+        vv.removeEventListener("resize", measure)
+        vv.removeEventListener("scroll", measure)
+      }
+    }
+  }, [inputHeight, shouldStickBottom])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
   }, [messages, status])
 
-  const shouldStickBottom = messages.length > 0
+  
 
   return (
     <div className="bg-background flex min-h-dvh w-full justify-center">
       <main
         className={cn("@container w-full max-w-3xl p-4", !shouldStickBottom && "flex min-h-dvh items-center")}
+        style={{ paddingBottom: shouldStickBottom ? Math.max(inputHeight + 16, 80) : 0 }}
       >
         <div className="mb-4 space-y-3">
           {messages.map((m) => (
@@ -855,24 +893,24 @@ export default function Home() {
             />
           </div>
         ) : null}
-        {shouldStickBottom ? (
-          <div className="sticky bottom-0 z-40 border-t border-border/50 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div ref={inputContainerRef} className="mx-auto w-full max-w-3xl p-4 pb-[calc(env(safe-area-inset-bottom,0)+0px)]">
-              <ChatInput
-                value={input}
-                onValueChange={setInput}
-                onSend={handleSend}
-                isSubmitting={isSubmitting}
-                files={files}
-                onFileUpload={handleFileUpload}
-                onFileRemove={handleFileRemove}
-                stop={stop}
-                status={status}
-              />
-            </div>
-          </div>
-        ) : null}
       </main>
+      {shouldStickBottom ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background">
+          <div ref={inputContainerRef} className="mx-auto w-full max-w-3xl p-4 pb-[calc(env(safe-area-inset-bottom,0)+0px)]">
+            <ChatInput
+              value={input}
+              onValueChange={setInput}
+              onSend={handleSend}
+              isSubmitting={isSubmitting}
+              files={files}
+              onFileUpload={handleFileUpload}
+              onFileRemove={handleFileRemove}
+              stop={stop}
+              status={status}
+            />
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
