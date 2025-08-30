@@ -506,7 +506,7 @@ function ChatInput({ value, onValueChange, onSend, isSubmitting, files, onFileUp
   return (
     <div className="relative flex w-full flex-col gap-4">
       <div className="relative order-2 px-2 pb-3 sm:pb-4 md:order-1">
-        <PromptInput className="bg-popover relative z-10 p-0 pt-1 shadow-xs backdrop-blur-xl" maxHeight={200} value={value} onValueChange={onValueChange}>
+        <PromptInput className="bg-popover relative z-10 p-0 pt-1 shadow-xs" maxHeight={200} value={value} onValueChange={onValueChange}>
           <FileList files={files} onFileRemove={onFileRemove} />
           <PromptInputTextarea
             onKeyDown={handleKeyDown}
@@ -783,25 +783,39 @@ export default function Home() {
   useEffect(() => {
     const el = inputContainerRef.current
     if (!el || typeof ResizeObserver === "undefined") return
+    let raf = 0
+    let last = inputHeight
     const ro = new ResizeObserver((entries) => {
       const entry = entries[0]
       if (!entry) return
       const h = Math.ceil(entry.contentRect.height)
-      if (h !== inputHeight) setInputHeight(h)
+      if (h === last) return
+      last = h
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => setInputHeight(h))
     })
     ro.observe(el)
-    return () => ro.disconnect()
+    return () => {
+      cancelAnimationFrame(raf)
+      ro.disconnect()
+    }
   }, [inputHeight])
 
   // Track whether the user is near the bottom; only autoscroll in that case
   useEffect(() => {
+    let ticking = false
     const handleScroll = () => {
-      const el = document.documentElement
-      const scrollTop = window.scrollY || el.scrollTop
-      const viewportHeight = window.innerHeight
-      const documentHeight = el.scrollHeight
-      const distanceToBottom = documentHeight - (scrollTop + viewportHeight)
-      setIsNearBottom(distanceToBottom < 120)
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const el = document.documentElement
+        const scrollTop = window.scrollY || el.scrollTop
+        const viewportHeight = window.innerHeight
+        const documentHeight = el.scrollHeight
+        const distanceToBottom = documentHeight - (scrollTop + viewportHeight)
+        setIsNearBottom(distanceToBottom < 120)
+        ticking = false
+      })
     }
     handleScroll()
     window.addEventListener("scroll", handleScroll, { passive: true })
@@ -815,7 +829,7 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior, block: "end" })
   }, [messages, status, isNearBottom])
 
-  const shouldStickBottom = messages.length > 0
+  const shouldStickBottom = true
 
   return (
     <div className="bg-background flex min-h-dvh w-full justify-center">
@@ -872,24 +886,10 @@ export default function Home() {
           ))}
           <div ref={messagesEndRef} />
         </div>
-        {!shouldStickBottom ? (
-          <div ref={inputContainerRef} className="w-full">
-            <ChatInput
-              value={input}
-              onValueChange={setInput}
-              onSend={handleSend}
-              isSubmitting={isSubmitting}
-              files={files}
-              onFileUpload={handleFileUpload}
-              onFileRemove={handleFileRemove}
-              stop={stop}
-              status={status}
-            />
-          </div>
-        ) : null}
+        {null}
       </main>
       {shouldStickBottom ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-anchor-none will-change-transform">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/85 supports-[backdrop-filter]:bg-background/70 overflow-anchor-none gpu-layer">
           <div ref={inputContainerRef} className="mx-auto w-full max-w-3xl p-4 pb-[calc(env(safe-area-inset-bottom,0)+0px)]">
             <ChatInput
               value={input}
