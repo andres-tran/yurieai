@@ -551,6 +551,7 @@ export default function Home() {
   const inputContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [inputHeight, setInputHeight] = useState<number>(134)
+  const [isNearBottom, setIsNearBottom] = useState(true)
 
   const appendMessage = useCallback((msg: Omit<ChatMessage, "id">) => {
     const id = `${Date.now()}_${Math.random().toString(36).slice(2)}`
@@ -792,9 +793,27 @@ export default function Home() {
     return () => ro.disconnect()
   }, [inputHeight])
 
+  // Track whether the user is near the bottom; only autoscroll in that case
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
-  }, [messages, status])
+    const handleScroll = () => {
+      const el = document.documentElement
+      const scrollTop = window.scrollY || el.scrollTop
+      const viewportHeight = window.innerHeight
+      const documentHeight = el.scrollHeight
+      const distanceToBottom = documentHeight - (scrollTop + viewportHeight)
+      setIsNearBottom(distanceToBottom < 120)
+    }
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // Autoscroll to bottom when new content arrives, but avoid smooth scrolling during streaming
+  useEffect(() => {
+    if (!isNearBottom) return
+    const behavior: ScrollBehavior = status === "streaming" ? "auto" : "smooth"
+    messagesEndRef.current?.scrollIntoView({ behavior, block: "end" })
+  }, [messages, status, isNearBottom])
 
   const shouldStickBottom = messages.length > 0
 
@@ -804,7 +823,7 @@ export default function Home() {
         className={cn("@container w-full max-w-3xl p-4", !shouldStickBottom && "flex min-h-dvh items-center")}
         style={{ paddingBottom: shouldStickBottom ? Math.max(inputHeight + 16, 80) : 0 }}
       >
-        <div className="mb-4 space-y-3">
+        <div className="mb-4 space-y-3 overflow-anchor-none">
           {messages.map((m) => (
             <div
               key={m.id}
@@ -870,7 +889,7 @@ export default function Home() {
         ) : null}
       </main>
       {shouldStickBottom ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-anchor-none will-change-transform">
           <div ref={inputContainerRef} className="mx-auto w-full max-w-3xl p-4 pb-[calc(env(safe-area-inset-bottom,0)+0px)]">
             <ChatInput
               value={input}
