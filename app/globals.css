@@ -116,33 +116,15 @@
 }
 
 @layer base {
-  html {
-    @apply bg-background;
-    overscroll-behavior-y: contain;
-  }
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground antialiased leading-relaxed tracking-normal text-pretty;
-    min-height: 100dvh;
   }
 
   p {
     @apply leading-relaxed text-pretty;
-  }
-}
-
-@layer utilities {
-  .overflow-anchor-none {
-    overflow-anchor: none;
-  }
-  .gpu-layer {
-    transform: translateZ(0);
-    will-change: transform;
-  }
-  .h-svh {
-    height: 100svh;
   }
 }
 
@@ -155,3 +137,5 @@ code {
 [data-sonner-toaster] > li {
   width: 100%;
 }
+
+
