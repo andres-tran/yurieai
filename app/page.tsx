@@ -22,6 +22,12 @@ type ChatMessage = {
   role: "user" | "assistant" | "developer"
   content: string
   imageBase64?: string
+  attachments?: Array<{
+    name: string
+    size: number
+    type: string
+    url?: string
+  }>
 }
 
 const buttonVariants = cva(
@@ -336,33 +342,25 @@ function PromptInputAction({ tooltip, children, className, side = "top", ...prop
 
 function FileItem({ file, onRemove }: { file: File; onRemove: (file: File) => void }) {
   const [isRemoving, setIsRemoving] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
   const handleRemove = () => {
     setIsRemoving(true)
     onRemove(file)
   }
   return (
     <div className="relative mr-2 mb-0 flex items-center">
-      <HoverCard open={file.type.includes("image") ? isOpen : false} onOpenChange={setIsOpen}>
-        <HoverCardTrigger className="w-full">
-          <div className="bg-background hover:bg-accent border-input flex w-full items-center gap-3 rounded-2xl border p-2 pr-3 transition-colors">
-            <div className="bg-accent-foreground flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-md">
-              {file.type.includes("image") ? (
-                <Image src={URL.createObjectURL(file)} alt={file.name} width={40} height={40} className="h-full w-full object-cover" />
-              ) : (
-                <div className="text-center text-xs text-gray-400">{file.name.split(".").pop()?.toUpperCase()}</div>
-              )}
-            </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="truncate text-xs font-medium">{file.name}</span>
-              <span className="text-xs text-gray-500">{(file.size / 1024).toFixed(2)}kB</span>
-            </div>
-          </div>
-        </HoverCardTrigger>
-        <HoverCardContent side="top">
-          <Image src={URL.createObjectURL(file)} alt={file.name} width={200} height={200} className="h-full w-full object-cover" />
-        </HoverCardContent>
-      </HoverCard>
+      <div className="bg-background hover:bg-accent border-input flex w-full items-center gap-3 rounded-2xl border p-2 pr-3 transition-colors">
+        <div className="bg-accent-foreground flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-md">
+          {file.type.includes("image") ? (
+            <Image src={URL.createObjectURL(file)} alt={file.name} width={40} height={40} className="h-full w-full object-cover" />
+          ) : (
+            <div className="text-center text-xs text-gray-400">{file.name.split(".").pop()?.toUpperCase()}</div>
+          )}
+        </div>
+        <div className="flex flex-col overflow-hidden">
+          <span className="truncate text-xs font-medium">{file.name}</span>
+          <span className="text-xs text-gray-500">{(file.size / 1024).toFixed(2)}kB</span>
+        </div>
+      </div>
       {!isRemoving ? (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -513,6 +511,7 @@ function ChatInput({ value, onValueChange, onSend, isSubmitting, files, onFileUp
           <PromptInputTextarea
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
+            placeholder="Ask anything"
             className="min-h-[44px] pt-3 pl-4 text-base leading-[1.3] sm:text-base md:text-base"
           />
           <PromptInputActions className="mt-3 w-full justify-between p-2">
@@ -626,6 +625,7 @@ export default function Home() {
         setStatus("streaming")
         // Prepare multimodal input if images are attached
         const imageFiles = currentFiles.filter((f) => f.type.startsWith("image/"))
+        const nonImageFiles = currentFiles.filter((f) => !f.type.startsWith("image/"))
         const dataUrls: string[] = await Promise.all(
           imageFiles.map(
             (file) =>
@@ -637,6 +637,15 @@ export default function Home() {
               })
           )
         )
+
+        // Update the previously appended user message to show their attachments (images + other files)
+        const attachments = [
+          ...imageFiles.map((file, idx) => ({ name: file.name, size: file.size, type: file.type, url: dataUrls[idx] })),
+          ...nonImageFiles.map((file) => ({ name: file.name, size: file.size, type: file.type })),
+        ]
+        if (attachments.length > 0) {
+          updateMessage(userId, (prev) => ({ ...prev, attachments }))
+        }
 
         const multimodalContent: Array<
           | { type: "input_text"; text: string }
@@ -787,16 +796,21 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
   }, [messages, status])
 
+  const shouldStickBottom = messages.length > 0
+
   return (
     <div className="bg-background flex min-h-dvh w-full justify-center">
-      <main className="@container w-full max-w-3xl p-4" style={{ paddingBottom: Math.max(inputHeight + 16, 80) }}>
+      <main
+        className={cn("@container w-full max-w-3xl p-4", !shouldStickBottom && "flex min-h-dvh items-center")}
+        style={{ paddingBottom: shouldStickBottom ? Math.max(inputHeight + 16, 80) : 0 }}
+      >
         <div className="mb-4 space-y-3">
           {messages.map((m) => (
             <div
               key={m.id}
               className={cn(
                 "border-input bg-popover text-popover-foreground w-full rounded-2xl border p-3",
-                m.role === "user" ? "border-primary/30" : "border-muted"
+                "border-muted"
               )}
             >
               <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">{m.role}</div>
@@ -809,26 +823,69 @@ export default function Home() {
               ) : (
                 <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
               )}
+              {Array.isArray(m.attachments) && m.attachments.length > 0 ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {m.attachments.map((att, idx) => {
+                    const isImg = /^image\//.test(att.type)
+                    if (isImg && att.url) {
+                      return (
+                        <img
+                          key={`${att.name}-${idx}`}
+                          src={att.url}
+                          alt={att.name}
+                          className="h-28 w-28 rounded-md border object-cover"
+                        />
+                      )
+                    }
+                    return (
+                      <div
+                        key={`${att.name}-${idx}`}
+                        className="border-input bg-background text-xs rounded-md border px-2 py-1"
+                        title={`${att.name} (${Math.ceil(att.size / 1024)}KB)`}
+                      >
+                        {att.name}
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : null}
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
+        {!shouldStickBottom ? (
+          <div ref={inputContainerRef} className="w-full">
+            <ChatInput
+              value={input}
+              onValueChange={setInput}
+              onSend={handleSend}
+              isSubmitting={isSubmitting}
+              files={files}
+              onFileUpload={handleFileUpload}
+              onFileRemove={handleFileRemove}
+              stop={stop}
+              status={status}
+            />
+          </div>
+        ) : null}
       </main>
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div ref={inputContainerRef} className="mx-auto w-full max-w-3xl p-4 pb-[calc(env(safe-area-inset-bottom,0)+0px)]">
-          <ChatInput
-            value={input}
-            onValueChange={setInput}
-            onSend={handleSend}
-            isSubmitting={isSubmitting}
-            files={files}
-            onFileUpload={handleFileUpload}
-            onFileRemove={handleFileRemove}
-            stop={stop}
-            status={status}
-          />
+      {shouldStickBottom ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div ref={inputContainerRef} className="mx-auto w-full max-w-3xl p-4 pb-[calc(env(safe-area-inset-bottom,0)+0px)]">
+            <ChatInput
+              value={input}
+              onValueChange={setInput}
+              onSend={handleSend}
+              isSubmitting={isSubmitting}
+              files={files}
+              onFileUpload={handleFileUpload}
+              onFileRemove={handleFileRemove}
+              stop={stop}
+              status={status}
+            />
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   )
 }
