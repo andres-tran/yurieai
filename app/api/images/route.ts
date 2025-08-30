@@ -4,7 +4,7 @@ export const runtime = "nodejs"
 
 type GenerateBody = {
   prompt: string
-  size?: "1024x1024" | "768x768" | "512x512" | string
+  size?: string
   // optional input images (as URLs or data URLs) used for editing/variations in the future
   images?: string[]
   fidelity?: "low" | "high"
@@ -23,10 +23,26 @@ export async function POST(req: Request) {
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
+    // Validate and narrow size to the allowed union for the Images API
+    const allowedSizes = [
+      "auto",
+      "256x256",
+      "512x512",
+      "1024x1024",
+      "1024x1536",
+      "1536x1024",
+      "1024x1792",
+      "1792x1024",
+    ] as const
+    type AllowedSize = (typeof allowedSizes)[number]
+    const requestedSize: AllowedSize = allowedSizes.includes(size as AllowedSize)
+      ? (size as AllowedSize)
+      : "1024x1024"
+
     const result = await client.images.generate({
       model: process.env.OPENAI_IMAGE_MODEL || "gpt-image-1",
       prompt,
-      size: size || "1024x1024",
+      size: requestedSize,
       // Note: We are not handling edits/variations here; this endpoint is for generations
       // Additional options like quality/background/output_format can be added later
     })
