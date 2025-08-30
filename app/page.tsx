@@ -130,8 +130,6 @@ function FileUpload({ onFilesAdded, children, multiple = true, accept, disabled 
     [multiple, onFilesAdded]
   )
 
-  const shouldStickBottom = messages.length > 0
-
   useEffect(() => {
     const handleDrag = (e: DragEvent) => {
       e.preventDefault()
@@ -553,6 +551,8 @@ export default function Home() {
   const inputContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [inputHeight, setInputHeight] = useState<number>(134)
+
+  const shouldStickBottom = messages.length > 0
 
   const appendMessage = useCallback((msg: Omit<ChatMessage, "id">) => {
     const id = `${Date.now()}_${Math.random().toString(36).slice(2)}`
