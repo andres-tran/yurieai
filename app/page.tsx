@@ -506,7 +506,7 @@ function ChatInput({ value, onValueChange, onSend, isSubmitting, files, onFileUp
   return (
     <div className="relative flex w-full flex-col gap-4">
       <div className="relative order-2 px-2 pb-3 sm:pb-4 md:order-1">
-        <PromptInput className="bg-popover relative z-10 p-0 pt-1 shadow-xs" maxHeight={200} value={value} onValueChange={onValueChange}>
+        <PromptInput className="bg-popover relative z-10 p-0 pt-1 shadow-xs backdrop-blur-xl" maxHeight={200} value={value} onValueChange={onValueChange}>
           <FileList files={files} onFileRemove={onFileRemove} />
           <PromptInputTextarea
             onKeyDown={handleKeyDown}
@@ -551,8 +551,6 @@ export default function Home() {
   const inputContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [inputHeight, setInputHeight] = useState<number>(134)
-  const [isNearBottom, setIsNearBottom] = useState(true)
-  const scrollRef = useRef<HTMLDivElement>(null)
 
   const appendMessage = useCallback((msg: Omit<ChatMessage, "id">) => {
     const id = `${Date.now()}_${Math.random().toString(36).slice(2)}`
@@ -784,129 +782,112 @@ export default function Home() {
   useEffect(() => {
     const el = inputContainerRef.current
     if (!el || typeof ResizeObserver === "undefined") return
-    let raf = 0
-    let last = inputHeight
     const ro = new ResizeObserver((entries) => {
       const entry = entries[0]
       if (!entry) return
       const h = Math.ceil(entry.contentRect.height)
-      if (h === last) return
-      last = h
-      cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => setInputHeight(h))
+      if (h !== inputHeight) setInputHeight(h)
     })
     ro.observe(el)
-    return () => {
-      cancelAnimationFrame(raf)
-      ro.disconnect()
-    }
+    return () => ro.disconnect()
   }, [inputHeight])
 
-  // Track whether the user is near the bottom; only autoscroll in that case
   useEffect(() => {
-    let ticking = false
-    const scroller = scrollRef.current
-    if (!scroller) return
-    const handleScroll = () => {
-      if (ticking) return
-      ticking = true
-      requestAnimationFrame(() => {
-        const distanceToBottom = scroller.scrollHeight - (scroller.scrollTop + scroller.clientHeight)
-        setIsNearBottom(distanceToBottom < 120)
-        ticking = false
-      })
-    }
-    // initialize state based on current scroll
-    handleScroll()
-    scroller.addEventListener("scroll", handleScroll, { passive: true })
-    return () => scroller.removeEventListener("scroll", handleScroll)
-  }, [])
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
+  }, [messages, status])
 
-  // Autoscroll to bottom when new content arrives, but avoid smooth scrolling during streaming
-  useEffect(() => {
-    if (!isNearBottom) return
-    const scroller = scrollRef.current
-    if (!scroller) return
-    if (status === "streaming") {
-      scroller.scrollTop = scroller.scrollHeight
-    } else {
-      scroller.scrollTo({ top: scroller.scrollHeight, behavior: "smooth" })
-    }
-  }, [messages, status, isNearBottom])
+  const shouldStickBottom = messages.length > 0
 
   return (
-    <div className="bg-background w-full h-svh overflow-hidden">
-      <div className="mx-auto w-full max-w-3xl h-full flex flex-col">
-        <div ref={scrollRef} className="flex-1 overflow-y-auto flex flex-col">
-          <div className="px-4 flex-1">
-            <div className="mb-4 space-y-3 overflow-anchor-none">
-              {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={cn(
-                    "border-input bg-popover text-popover-foreground w-full rounded-2xl border p-3",
-                    "border-muted"
-                  )}
-                >
-                  <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">{m.role}</div>
-                  {m.imageBase64 ? (
-                    <img
-                      alt="Generated image"
-                      src={`data:image/png;base64,${m.imageBase64}`}
-                      className="w-full h-auto rounded-lg border"
-                    />
-                  ) : (
-                    <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
-                  )}
-                  {Array.isArray(m.attachments) && m.attachments.length > 0 ? (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {m.attachments.map((att, idx) => {
-                        const isImg = /^image\//.test(att.type)
-                        if (isImg && att.url) {
-                          return (
-                            <img
-                              key={`${att.name}-${idx}`}
-                              src={att.url}
-                              alt={att.name}
-                              className="h-28 w-28 rounded-md border object-cover"
-                            />
-                          )
-                        }
-                        return (
-                          <div
-                            key={`${att.name}-${idx}`}
-                            className="border-input bg-background text-xs rounded-md border px-2 py-1"
-                            title={`${att.name} (${Math.ceil(att.size / 1024)}KB)`}
-                          >
-                            {att.name}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  ) : null}
+    <div className="bg-background flex min-h-dvh w-full justify-center">
+      <main
+        className={cn("@container w-full max-w-3xl p-4", !shouldStickBottom && "flex min-h-dvh items-center")}
+        style={{ paddingBottom: shouldStickBottom ? Math.max(inputHeight + 16, 80) : 0 }}
+      >
+        <div className="mb-4 space-y-3">
+          {messages.map((m) => (
+            <div
+              key={m.id}
+              className={cn(
+                "border-input bg-popover text-popover-foreground w-full rounded-2xl border p-3",
+                "border-muted"
+              )}
+            >
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">{m.role}</div>
+              {m.imageBase64 ? (
+                <img
+                  alt="Generated image"
+                  src={`data:image/png;base64,${m.imageBase64}`}
+                  className="w-full h-auto rounded-lg border"
+                />
+              ) : (
+                <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
+              )}
+              {Array.isArray(m.attachments) && m.attachments.length > 0 ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {m.attachments.map((att, idx) => {
+                    const isImg = /^image\//.test(att.type)
+                    if (isImg && att.url) {
+                      return (
+                        <img
+                          key={`${att.name}-${idx}`}
+                          src={att.url}
+                          alt={att.name}
+                          className="h-28 w-28 rounded-md border object-cover"
+                        />
+                      )
+                    }
+                    return (
+                      <div
+                        key={`${att.name}-${idx}`}
+                        className="border-input bg-background text-xs rounded-md border px-2 py-1"
+                        title={`${att.name} (${Math.ceil(att.size / 1024)}KB)`}
+                      >
+                        {att.name}
+                      </div>
+                    )
+                  })}
                 </div>
-              ))}
-              <div ref={messagesEndRef} />
+              ) : null}
             </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+        {!shouldStickBottom ? (
+          <div ref={inputContainerRef} className="w-full">
+            <ChatInput
+              value={input}
+              onValueChange={setInput}
+              onSend={handleSend}
+              isSubmitting={isSubmitting}
+              files={files}
+              onFileUpload={handleFileUpload}
+              onFileRemove={handleFileRemove}
+              stop={stop}
+              status={status}
+            />
           </div>
-
-          <div className="sticky bottom-0 z-40 border-t border-border/50 bg-background/85 overflow-anchor-none gpu-layer mt-auto">
-            <div ref={inputContainerRef} className="mx-auto w-full max-w-3xl p-4 pb-[calc(env(safe-area-inset-bottom,0)+0px)]">
-              <ChatInput
-                value={input}
-                onValueChange={setInput}
-                onSend={handleSend}
-                isSubmitting={isSubmitting}
-                files={files}
-                onFileUpload={handleFileUpload}
-                onFileRemove={handleFileRemove}
-                stop={stop}
-                status={status}
-              />
-            </div>
+        ) : null}
+      </main>
+      {shouldStickBottom ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div ref={inputContainerRef} className="mx-auto w-full max-w-3xl p-4 pb-[calc(env(safe-area-inset-bottom,0)+0px)]">
+            <ChatInput
+              value={input}
+              onValueChange={setInput}
+              onSend={handleSend}
+              isSubmitting={isSubmitting}
+              files={files}
+              onFileUpload={handleFileUpload}
+              onFileRemove={handleFileRemove}
+              stop={stop}
+              status={status}
+            />
           </div>
         </div>
-      </div>
+      ) : null}
     </div>
   )
 }
+
+
