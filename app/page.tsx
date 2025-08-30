@@ -837,8 +837,8 @@ export default function Home() {
   return (
     <div className="bg-background w-full h-svh overflow-hidden">
       <div className="mx-auto w-full max-w-3xl h-full flex flex-col">
-        <div ref={scrollRef} className="flex-1 overflow-y-auto">
-          <div className="px-4">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto flex flex-col">
+          <div className="px-4 flex-1">
             <div className="mb-4 space-y-3 overflow-anchor-none">
               {messages.map((m) => (
                 <div
@@ -890,7 +890,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="sticky bottom-0 z-40 border-t border-border/50 bg-background/85 overflow-anchor-none gpu-layer">
+          <div className="sticky bottom-0 z-40 border-t border-border/50 bg-background/85 overflow-anchor-none gpu-layer mt-auto">
             <div ref={inputContainerRef} className="mx-auto w-full max-w-3xl p-4 pb-[calc(env(safe-area-inset-bottom,0)+0px)]">
               <ChatInput
                 value={input}
