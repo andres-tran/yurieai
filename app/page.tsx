@@ -552,8 +552,6 @@ export default function Home() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [inputHeight, setInputHeight] = useState<number>(134)
 
-  const shouldStickBottom = messages.length > 0
-
   const appendMessage = useCallback((msg: Omit<ChatMessage, "id">) => {
     const id = `${Date.now()}_${Math.random().toString(36).slice(2)}`
     setMessages((prev) => [...prev, { id, ...msg }])
@@ -784,44 +782,21 @@ export default function Home() {
   useEffect(() => {
     const el = inputContainerRef.current
     if (!el || typeof ResizeObserver === "undefined") return
-
-    const measure = () => {
-      // Use the full rendered height so padding/safe-area on mobile is included
-      const h = Math.ceil(el.getBoundingClientRect().height)
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0]
+      if (!entry) return
+      const h = Math.ceil(entry.contentRect.height)
       if (h !== inputHeight) setInputHeight(h)
-    }
-
-    const ro = new ResizeObserver(() => {
-      measure()
     })
     ro.observe(el)
-
-    // Initial measurement and on viewport changes (rotation/resizes)
-    measure()
-    window.addEventListener("resize", measure)
-    window.addEventListener("orientationchange", measure)
-    const vv = typeof window !== "undefined" ? (window as any).visualViewport : undefined
-    if (vv && vv.addEventListener) {
-      vv.addEventListener("resize", measure)
-      vv.addEventListener("scroll", measure)
-    }
-
-    return () => {
-      ro.disconnect()
-      window.removeEventListener("resize", measure)
-      window.removeEventListener("orientationchange", measure)
-      if (vv && vv.removeEventListener) {
-        vv.removeEventListener("resize", measure)
-        vv.removeEventListener("scroll", measure)
-      }
-    }
-  }, [inputHeight, shouldStickBottom])
+    return () => ro.disconnect()
+  }, [inputHeight])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
   }, [messages, status])
 
-  
+  const shouldStickBottom = messages.length > 0
 
   return (
     <div className="bg-background flex min-h-dvh w-full justify-center">
@@ -895,7 +870,7 @@ export default function Home() {
         ) : null}
       </main>
       {shouldStickBottom ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div ref={inputContainerRef} className="mx-auto w-full max-w-3xl p-4 pb-[calc(env(safe-area-inset-bottom,0)+0px)]">
             <ChatInput
               value={input}
