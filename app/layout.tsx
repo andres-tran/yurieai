@@ -23,22 +23,6 @@ export const metadata: Metadata = {
   title: "Yurie",
   description:
     "Yurie is the open-source interface for AI chat using OpenAI models only. Fully self-hostable.",
-  applicationName: "Yurie",
-  manifest: "/manifest.webmanifest",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0d0d0d" },
-  ],
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
-  },
-  appleWebApp: {
-    capable: true,
-    title: "Yurie",
-    statusBarStyle: "black-translucent",
-  },
 }
 
 export default async function RootLayout({
