@@ -141,6 +141,9 @@
     transform: translateZ(0);
     will-change: transform;
   }
+  .h-svh {
+    height: 100svh;
+  }
 }
 
 code {
